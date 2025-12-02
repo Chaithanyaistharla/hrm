@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Employee Profile - HRMS{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-edit"></i> Edit My Profile
+            <a href="{% url 'employee_profile' %}" class="btn btn-outline-secondary btn-sm float-end">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+        </h1>
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <!-- Basic Information -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> Basic Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                   value="{{ user.first_name }}" maxlength="30">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                   value="{{ user.last_name }}" maxlength="30">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Work Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ user.email }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="personal_email" class="form-label">Personal Email</label>
+                            <input type="email" class="form-control" id="personal_email" name="personal_email" 
+                                   value="{{ employee_profile.personal_email }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                   value="{{ user.phone_number }}" maxlength="15">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="date_of_birth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+                                   value="{{ employee_profile.date_of_birth|date:'Y-m-d' }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender">
+                                <option value="">Select Gender</option>
+                                {% for value, label in employee_profile.GENDER_CHOICES %}
+                                    <option value="{{ value }}" {% if employee_profile.gender == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="marital_status" class="form-label">Marital Status</label>
+                            <select class="form-select" id="marital_status" name="marital_status">
+                                <option value="">Select Status</option>
+                                {% for value, label in employee_profile.MARITAL_STATUS_CHOICES %}
+                                    <option value="{{ value }}" {% if employee_profile.marital_status == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="nationality" class="form-label">Nationality</label>
+                            <input type="text" class="form-control" id="nationality" name="nationality" 
+                                   value="{{ employee_profile.nationality }}" maxlength="50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt"></i> Address Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="address_line_1" class="form-label">Address Line 1</label>
+                            <input type="text" class="form-control" id="address_line_1" name="address_line_1" 
+                                   value="{{ employee_profile.address_line_1 }}" maxlength="200">
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="address_line_2" class="form-label">Address Line 2</label>
+                            <input type="text" class="form-control" id="address_line_2" name="address_line_2" 
+                                   value="{{ employee_profile.address_line_2 }}" maxlength="200">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" 
+                                   value="{{ employee_profile.city }}" maxlength="100">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="state" class="form-label">State/Province</label>
+                            <input type="text" class="form-control" id="state" name="state" 
+                                   value="{{ employee_profile.state }}" maxlength="100">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="postal_code" class="form-label">Postal/ZIP Code</label>
+                            <input type="text" class="form-control" id="postal_code" name="postal_code" 
+                                   value="{{ employee_profile.postal_code }}" maxlength="20">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" name="country" 
+                                   value="{{ employee_profile.country }}" maxlength="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emergency Contact -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Emergency Contact
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="emergency_contact_name" class="form-label">Contact Name</label>
+                        <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" 
+                               value="{{ employee_profile.emergency_contact_name }}" maxlength="100">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="emergency_contact_phone" class="form-label">Contact Phone</label>
+                        <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" 
+                               value="{{ employee_profile.emergency_contact_phone }}" maxlength="15">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="emergency_contact_relationship" class="form-label">Relationship</label>
+                        <input type="text" class="form-control" id="emergency_contact_relationship" name="emergency_contact_relationship" 
+                               value="{{ employee_profile.emergency_contact_relationship }}" maxlength="50" 
+                               placeholder="e.g., Spouse, Parent, Sibling">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Info (Read-only) -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Employment Information
+                        <small class="text-muted">(Contact HR to update)</small>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Employee ID:</label>
+                        <p class="form-control-plaintext">{{ user.employee_id|default:"Not assigned" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Department:</label>
+                        <p class="form-control-plaintext">{{ user.department|default:"Not assigned" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Designation:</label>
+                        <p class="form-control-plaintext">{{ employee_profile.designation|default:"Not assigned" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Date of Joining:</label>
+                        <p class="form-control-plaintext">
+                            {{ employee_profile.date_of_joining|default:"Not set"|date:"F d, Y" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{% url 'employee_profile' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-save draft (optional enhancement)
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    // Add visual feedback for unsaved changes
+    let hasUnsavedChanges = false;
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            hasUnsavedChanges = true;
+            document.title = '• ' + document.title.replace('• ', '');
+        });
+    });
+    
+    // Warn before leaving with unsaved changes
+    window.addEventListener('beforeunload', function(e) {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    
+    // Remove warning when form is submitted
+    form.addEventListener('submit', function() {
+        hasUnsavedChanges = false;
+    });
+});
+</script>
+{% endblock %}

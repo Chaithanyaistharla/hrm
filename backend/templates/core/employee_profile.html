@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}My Employee Profile - HRMS{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-id-card"></i> My Employee Profile
+            <a href="{% url 'employee_profile_edit' %}" class="btn btn-primary btn-sm float-end">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Personal Information -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i> Personal Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Full Name:</label>
+                        <p class="form-control-plaintext">{{ employee_profile.full_name }}</p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Employee ID:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.employee_id|default:"Not assigned" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Date of Birth:</label>
+                        <p class="form-control-plaintext">
+                            {% if employee_profile.date_of_birth %}
+                                {{ employee_profile.date_of_birth|date:"F d, Y" }}
+                                {% if employee_profile.age %}
+                                    ({{ employee_profile.age }} years old)
+                                {% endif %}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Gender:</label>
+                        <p class="form-control-plaintext">
+                            {{ employee_profile.get_gender_display|default:"Not provided" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Marital Status:</label>
+                        <p class="form-control-plaintext">
+                            {{ employee_profile.get_marital_status_display|default:"Not provided" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Nationality:</label>
+                        <p class="form-control-plaintext">
+                            {{ employee_profile.nationality|default:"Not provided" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-phone"></i> Contact Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Work Email:</label>
+                        <p class="form-control-plaintext">{{ user.email|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Personal Email:</label>
+                        <p class="form-control-plaintext">{{ employee_profile.personal_email|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Phone Number:</label>
+                        <p class="form-control-plaintext">{{ user.phone_number|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label font-weight-bold">Address:</label>
+                        <p class="form-control-plaintext">
+                            {% if employee_profile.full_address %}
+                                {{ employee_profile.full_address }}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Emergency Contact
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label font-weight-bold">Name:</label>
+                        <p class="form-control-plaintext">{{ employee_profile.emergency_contact_name|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label font-weight-bold">Phone:</label>
+                        <p class="form-control-plaintext">{{ employee_profile.emergency_contact_phone|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label font-weight-bold">Relationship:</label>
+                        <p class="form-control-plaintext">{{ employee_profile.emergency_contact_relationship|default:"Not provided" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Employment Details -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-briefcase"></i> Employment Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Designation:</label>
+                    <p class="form-control-plaintext">{{ employee_profile.designation|default:"Not assigned" }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Department:</label>
+                    <p class="form-control-plaintext">{{ user.department|default:"Not assigned" }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Role:</label>
+                    <p class="form-control-plaintext">
+                        {% if user.role %}
+                            <span class="badge bg-primary">{{ user.role.get_name_display }}</span>
+                        {% else %}
+                            No role assigned
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Date of Joining:</label>
+                    <p class="form-control-plaintext">
+                        {% if employee_profile.date_of_joining %}
+                            {{ employee_profile.date_of_joining|date:"F d, Y" }}
+                            {% if employee_profile.years_of_service %}
+                                <br><small class="text-muted">{{ employee_profile.years_of_service }} years of service</small>
+                            {% endif %}
+                        {% else %}
+                            Not set
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Employment Status:</label>
+                    <p class="form-control-plaintext">
+                        <span class="badge bg-success">{{ employee_profile.get_employment_status_display }}</span>
+                    </p>
+                </div>
+                
+                {% if employee_profile.manager %}
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Manager:</label>
+                    <p class="form-control-plaintext">{{ employee_profile.manager.get_full_name|default:employee_profile.manager.username }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Work Location:</label>
+                    <p class="form-control-plaintext">{{ employee_profile.work_location|default:"Not specified" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line"></i> Quick Stats
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">
+                            {% if employee_profile.years_of_service %}
+                                {{ employee_profile.years_of_service }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </h4>
+                        <small class="text-muted">Years of Service</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">
+                            {% if employee_profile.age %}
+                                {{ employee_profile.age }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </h4>
+                        <small class="text-muted">Age</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="text-center">
+                    <small class="text-muted">
+                        Profile last updated: {{ employee_profile.updated_at|date:"M d, Y" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}Employee Directory - HRMS{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-users"></i> Employee Directory
+            <small class="text-muted">({{ total_employees }} employee{{ total_employees|pluralize }})</small>
+        </h1>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search Employees</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ search_query }}" placeholder="Name, email, ID, department...">
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="department" class="form-label">Department</label>
+                <select class="form-select" id="department" name="department">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept }}" {% if department_filter == dept %}selected{% endif %}>
+                            {{ dept }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" id="role" name="role">
+                    <option value="">All Roles</option>
+                    {% for role_name, role_desc in roles %}
+                        <option value="{{ role_name }}" {% if role_filter == role_name %}selected{% endif %}>
+                            {{ role_desc }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        {% if search_query or department_filter or role_filter %}
+        <div class="mt-3">
+            <a href="{% url 'employee_directory' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times"></i> Clear Filters
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Employee List -->
+<div class="row">
+    {% for employee in employees %}
+    <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                         style="width: 50px; height: 50px; font-size: 18px; font-weight: bold;">
+                        {{ employee.first_name.0|default:employee.username.0|upper }}{{ employee.last_name.0|default:""|upper }}
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="card-title mb-1">
+                            {% if user.is_hr or user.is_admin_role %}
+                                <a href="{% url 'employee_detail' user_id=employee.id %}" class="text-decoration-none">
+                                    {{ employee.get_full_name|default:employee.username }}
+                                </a>
+                            {% else %}
+                                {{ employee.get_full_name|default:employee.username }}
+                            {% endif %}
+                        </h6>
+                        <div class="text-muted small">
+                            {% if employee.employee_profile.designation %}
+                                {{ employee.employee_profile.designation }}
+                            {% else %}
+                                {{ employee.department|default:"No designation" }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-12 mb-2">
+                        {% if employee.role %}
+                            <span class="badge bg-primary">{{ employee.role.get_name_display }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">No Role</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <hr class="my-3">
+                
+                <div class="row small text-muted">
+                    <div class="col-6">
+                        <i class="fas fa-id-badge me-1"></i>
+                        <strong>ID:</strong> {{ employee.employee_id|default:"-" }}
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-building me-1"></i>
+                        <strong>Dept:</strong> {{ employee.department|default:"-" }}
+                    </div>
+                </div>
+                
+                <div class="row small text-muted mt-1">
+                    <div class="col-6">
+                        <i class="fas fa-envelope me-1"></i>
+                        <strong>Email:</strong> 
+                        {% if employee.email %}
+                            <a href="mailto:{{ employee.email }}" class="text-muted">{{ employee.email|truncatechars:15 }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                    <div class="col-6">
+                        <i class="fas fa-calendar me-1"></i>
+                        <strong>Joined:</strong> 
+                        {% if employee.employee_profile.date_of_joining %}
+                            {{ employee.employee_profile.date_of_joining|date:"M Y" }}
+                        {% elif employee.hire_date %}
+                            {{ employee.hire_date|date:"M Y" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if employee.phone_number %}
+                <div class="row small text-muted mt-1">
+                    <div class="col-12">
+                        <i class="fas fa-phone me-1"></i>
+                        <strong>Phone:</strong> 
+                        <a href="tel:{{ employee.phone_number }}" class="text-muted">{{ employee.phone_number }}</a>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if employee.employee_profile.manager %}
+                <div class="row small text-muted mt-1">
+                    <div class="col-12">
+                        <i class="fas fa-user-tie me-1"></i>
+                        <strong>Manager:</strong> {{ employee.employee_profile.manager.get_full_name|default:employee.employee_profile.manager.username }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if user.is_hr or user.is_admin_role %}
+            <div class="card-footer bg-transparent">
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'employee_detail' user_id=employee.id %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                    <div>
+                        <a href="mailto:{{ employee.email }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        {% if employee.phone_number %}
+                        <a href="tel:{{ employee.phone_number }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-phone"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No employees found</h4>
+                {% if search_query or department_filter or role_filter %}
+                    <p class="text-muted">Try adjusting your search criteria or <a href="{% url 'employee_directory' %}">clear filters</a>.</p>
+                {% else %}
+                    <p class="text-muted">No employees are currently in the system.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if employees.has_other_pages %}
+<nav aria-label="Employee directory pagination">
+    <ul class="pagination justify-content-center mt-4">
+        {% if employees.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ employees.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            </li>
+        {% endif %}
+        
+        {% for num in employees.paginator.page_range %}
+            {% if employees.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > employees.number|add:'-3' and num < employees.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                        {{ num }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if employees.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ employees.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Real-time search (optional enhancement)
+    const searchInput = document.getElementById('search');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            // Could implement AJAX search here
+        }, 500);
+    });
+    
+    // Auto-submit form when filters change
+    const filterSelects = document.querySelectorAll('#department, #role');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

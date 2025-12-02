@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: hrms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hrms_db
+      POSTGRES_USER: hrms_user
+      POSTGRES_PASSWORD: hrms_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - hrms-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hrms_user -d hrms_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Django Backend
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: hrms-backend
+    restart: unless-stopped
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-docker-development-key-change-in-production
+      - DATABASE_ENGINE=django.db.backends.postgresql
+      - DATABASE_NAME=hrms_db
+      - DATABASE_USER=hrms_user
+      - DATABASE_PASSWORD=hrms_password
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend
+    volumes:
+      - ./database:/app/database
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hrms-network
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py seed_roles &&
+             python manage.py create_superuser_with_role &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  # Nginx (Optional - for production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: hrms-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - backend
+    networks:
+      - hrms-network
+
+  # Redis (Optional - for future caching/sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: hrms-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - hrms-network
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  redis_data:
+
+networks:
+  hrms-network:
+    driver: bridge

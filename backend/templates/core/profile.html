@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - HRMS{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-user"></i> My Profile
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Profile Information -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-id-card"></i> Personal Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Username:</label>
+                        <p class="form-control-plaintext">{{ user.username }}</p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Employee ID:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.employee_id|default:"Not assigned" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">First Name:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.first_name|default:"Not provided" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Last Name:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.last_name|default:"Not provided" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Email:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.email|default:"Not provided" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Phone Number:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.phone_number|default:"Not provided" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Department:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.department|default:"Not assigned" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Hire Date:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.hire_date|default:"Not set"|date:"F d, Y" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Date Joined:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.date_joined|date:"F d, Y" }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Last Login:</label>
+                        <p class="form-control-plaintext">
+                            {{ user.last_login|default:"Never"|date:"F d, Y g:i A" }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <button type="button" class="btn btn-primary" onclick="alert('Profile editing feature coming soon!')">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="alert('Password change feature coming soon!')">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Role and Permissions -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-tag"></i> Role & Permissions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Current Role:</label>
+                    {% if user.role %}
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary fs-6 me-2">{{ user.role.get_name_display }}</span>
+                        </div>
+                        <small class="text-muted">{{ user.role.description }}</small>
+                    {% else %}
+                        <p class="text-muted">No role assigned</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Account Status:</label>
+                    <div>
+                        {% if user.is_active %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Active
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-times"></i> Inactive
+                            </span>
+                        {% endif %}
+                        
+                        {% if user.is_staff %}
+                            <span class="badge bg-info ms-1">
+                                <i class="fas fa-user-cog"></i> Staff
+                            </span>
+                        {% endif %}
+                        
+                        {% if user.is_superuser %}
+                            <span class="badge bg-warning ms-1">
+                                <i class="fas fa-crown"></i> Superuser
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Permissions:</label>
+                    <ul class="list-unstyled mb-0">
+                        {% if user.role %}
+                            {% if user.is_admin_role or user.is_superuser %}
+                                <li><i class="fas fa-check text-success"></i> Full system access</li>
+                                <li><i class="fas fa-check text-success"></i> User management</li>
+                                <li><i class="fas fa-check text-success"></i> Reports access</li>
+                                <li><i class="fas fa-check text-success"></i> Admin panel</li>
+                            {% elif user.is_hr %}
+                                <li><i class="fas fa-check text-success"></i> Employee management</li>
+                                <li><i class="fas fa-check text-success"></i> HR reports</li>
+                                <li><i class="fas fa-times text-danger"></i> System configuration</li>
+                            {% elif user.is_manager %}
+                                <li><i class="fas fa-check text-success"></i> Team reports</li>
+                                <li><i class="fas fa-check text-success"></i> Team management</li>
+                                <li><i class="fas fa-times text-danger"></i> Full employee access</li>
+                            {% else %}
+                                <li><i class="fas fa-check text-success"></i> Personal profile</li>
+                                <li><i class="fas fa-check text-success"></i> Own attendance</li>
+                                <li><i class="fas fa-times text-danger"></i> Management features</li>
+                            {% endif %}
+                        {% else %}
+                            <li class="text-muted">No permissions assigned</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                {% if not user.role %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>No Role Assigned!</strong><br>
+                    Please contact your administrator to assign a role.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Account Statistics -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line"></i> Account Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ user.date_joined|timesince }}</h4>
+                        <small class="text-muted">Member Since</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">
+                            {% if user.last_login %}
+                                {{ user.last_login|timesince }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </h4>
+                        <small class="text-muted">Last Active</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

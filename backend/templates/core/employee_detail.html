@@ -1,0 +1,476 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ employee.get_full_name|default:employee.username }} - Employee Details - HRMS{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'employee_directory' %}">Employee Directory</a></li>
+                        <li class="breadcrumb-item active">{{ employee.get_full_name|default:employee.username }}</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a href="{% url 'employee_directory' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Directory
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 col-xl-3 mb-4">
+        <!-- Employee Card -->
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" 
+                     style="width: 80px; height: 80px; font-size: 24px; font-weight: bold;">
+                    {{ employee.first_name.0|default:employee.username.0|upper }}{{ employee.last_name.0|default:""|upper }}
+                </div>
+                <h5 class="card-title">{{ employee.get_full_name|default:employee.username }}</h5>
+                <p class="text-muted">
+                    {% if employee_profile.designation %}
+                        {{ employee_profile.designation }}
+                    {% else %}
+                        {{ employee.department|default:"No designation" }}
+                    {% endif %}
+                </p>
+                
+                {% if employee.role %}
+                    <span class="badge bg-primary mb-3">{{ employee.role.get_name_display }}</span>
+                {% else %}
+                    <span class="badge bg-secondary mb-3">No Role</span>
+                {% endif %}
+                
+                <div class="d-grid gap-2">
+                    <a href="mailto:{{ employee.email }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-envelope"></i> Send Email
+                    </a>
+                    {% if employee.phone_number %}
+                    <a href="tel:{{ employee.phone_number }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-phone"></i> Call
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-chart-line"></i> Quick Stats</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <div class="h5 text-primary mb-1">
+                                {% if employee_profile.date_of_joining %}
+                                    {{ employee_profile.date_of_joining|timesince|floatformat:0 }}
+                                {% elif employee.hire_date %}
+                                    {{ employee.hire_date|timesince|floatformat:0 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">Time with us</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="h5 text-success mb-1">
+                            {{ employee_profile.get_status_display|default:"Active" }}
+                        </div>
+                        <small class="text-muted">Status</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8 col-xl-9">
+        <!-- Employee Details Tabs -->
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="employeeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">
+                            <i class="fas fa-user"></i> Basic Info
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab">
+                            <i class="fas fa-address-book"></i> Contact
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="employment-tab" data-bs-toggle="tab" data-bs-target="#employment" type="button" role="tab">
+                            <i class="fas fa-briefcase"></i> Employment
+                        </button>
+                    </li>
+                    {% if user.is_hr or user.is_admin_role %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">
+                            <i class="fas fa-file-alt"></i> Documents
+                        </button>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="card-body">
+                <div class="tab-content" id="employeeTabContent">
+                    <!-- Basic Information Tab -->
+                    <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Personal Information</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">Full Name:</td>
+                                        <td>{{ employee.get_full_name|default:employee.username }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Employee ID:</td>
+                                        <td>{{ employee.employee_id|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Date of Birth:</td>
+                                        <td>
+                                            {% if employee_profile.date_of_birth %}
+                                                {{ employee_profile.date_of_birth|date:"F j, Y" }}
+                                                <small class="text-muted">({{ employee_profile.date_of_birth|timesince }} old)</small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Gender:</td>
+                                        <td>{{ employee_profile.get_gender_display|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Marital Status:</td>
+                                        <td>{{ employee_profile.get_marital_status_display|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Nationality:</td>
+                                        <td>{{ employee_profile.nationality|default:"-" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Work Information</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">Department:</td>
+                                        <td>{{ employee_profile.department|default:employee.department|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Designation:</td>
+                                        <td>{{ employee_profile.designation|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Role:</td>
+                                        <td>
+                                            {% if employee.role %}
+                                                <span class="badge bg-primary">{{ employee.role.get_name_display }}</span>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Manager:</td>
+                                        <td>
+                                            {% if employee_profile.manager %}
+                                                {{ employee_profile.manager.get_full_name|default:employee_profile.manager.username }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Employee Type:</td>
+                                        <td>{{ employee_profile.get_employee_type_display|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Status:</td>
+                                        <td>
+                                            <span class="badge bg-{% if employee_profile.status == 'active' %}success{% elif employee_profile.status == 'inactive' %}danger{% else %}warning{% endif %}">
+                                                {{ employee_profile.get_status_display|default:"Active" }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information Tab -->
+                    <div class="tab-pane fade" id="contact" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Contact Information</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">Work Email:</td>
+                                        <td>
+                                            {% if employee.email %}
+                                                <a href="mailto:{{ employee.email }}">{{ employee.email }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Personal Email:</td>
+                                        <td>
+                                            {% if employee_profile.personal_email %}
+                                                <a href="mailto:{{ employee_profile.personal_email }}">{{ employee_profile.personal_email }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Work Phone:</td>
+                                        <td>
+                                            {% if employee.phone_number %}
+                                                <a href="tel:{{ employee.phone_number }}">{{ employee.phone_number }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Personal Phone:</td>
+                                        <td>
+                                            {% if employee_profile.personal_phone %}
+                                                <a href="tel:{{ employee_profile.personal_phone }}">{{ employee_profile.personal_phone }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <h6 class="text-muted mb-3 mt-4">Address</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">Current Address:</td>
+                                        <td>
+                                            {% if employee_profile.current_address %}
+                                                {{ employee_profile.current_address }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Permanent Address:</td>
+                                        <td>
+                                            {% if employee_profile.permanent_address %}
+                                                {{ employee_profile.permanent_address }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Emergency Contact</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">Name:</td>
+                                        <td>{{ employee_profile.emergency_contact_name|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Relationship:</td>
+                                        <td>{{ employee_profile.emergency_contact_relationship|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Phone:</td>
+                                        <td>
+                                            {% if employee_profile.emergency_contact_phone %}
+                                                <a href="tel:{{ employee_profile.emergency_contact_phone }}">{{ employee_profile.emergency_contact_phone }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Employment Information Tab -->
+                    <div class="tab-pane fade" id="employment" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Employment Details</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">Date of Joining:</td>
+                                        <td>
+                                            {% if employee_profile.date_of_joining %}
+                                                {{ employee_profile.date_of_joining|date:"F j, Y" }}
+                                                <small class="text-muted">({{ employee_profile.date_of_joining|timesince }} ago)</small>
+                                            {% elif employee.hire_date %}
+                                                {{ employee.hire_date|date:"F j, Y" }}
+                                                <small class="text-muted">({{ employee.hire_date|timesince }} ago)</small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Probation End:</td>
+                                        <td>
+                                            {% if employee_profile.probation_end_date %}
+                                                {{ employee_profile.probation_end_date|date:"F j, Y" }}
+                                                {% if employee_profile.probation_end_date > today %}
+                                                    <small class="text-warning">({{ employee_profile.probation_end_date|timeuntil }} left)</small>
+                                                {% else %}
+                                                    <small class="text-success">(Completed)</small>
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Notice Period:</td>
+                                        <td>
+                                            {% if employee_profile.notice_period_days %}
+                                                {{ employee_profile.notice_period_days }} days
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Last Updated:</td>
+                                        <td>
+                                            {{ employee_profile.updated_at|date:"F j, Y" }}
+                                            <small class="text-muted">({{ employee_profile.updated_at|timesince }} ago)</small>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {% if user.is_hr or user.is_admin_role %}
+                                <h6 class="text-muted mb-3">Confidential Information</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">Salary:</td>
+                                        <td>
+                                            {% if employee_profile.salary %}
+                                                <span class="text-success">₹{{ employee_profile.salary|floatformat:0 }}</span>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Bank Account:</td>
+                                        <td>{{ employee_profile.bank_account_number|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Bank Name:</td>
+                                        <td>{{ employee_profile.bank_name|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">IFSC Code:</td>
+                                        <td>{{ employee_profile.ifsc_code|default:"-" }}</td>
+                                    </tr>
+                                </table>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Documents Tab (HR/Admin only) -->
+                    {% if user.is_hr or user.is_admin_role %}
+                    <div class="tab-pane fade" id="documents" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Identity Documents</h6>
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="text-muted" width="140">PAN Number:</td>
+                                        <td>{{ employee_profile.pan_number|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Aadhar Number:</td>
+                                        <td>
+                                            {% if employee_profile.aadhar_number %}
+                                                ****-****-{{ employee_profile.aadhar_number|slice:"-4:" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted">Passport Number:</td>
+                                        <td>{{ employee_profile.passport_number|default:"-" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if can_manage %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-cogs"></i> Management Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button type="button" class="btn btn-outline-warning">
+                        <i class="fas fa-user-clock"></i> Change Status
+                    </button>
+                    <button type="button" class="btn btn-outline-info">
+                        <i class="fas fa-history"></i> View History
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap tabs
+    var triggerTabList = [].slice.call(document.querySelectorAll('#employeeTabs button'))
+    triggerTabList.forEach(function (triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
+        
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault()
+            tabTrigger.show()
+        })
+    })
+});
+</script>
+{% endblock %}
