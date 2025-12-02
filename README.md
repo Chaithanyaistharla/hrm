@@ -23,16 +23,40 @@ hrms/
 
 ## Quick Start
 
-1. **Create and activate virtual environment:**
+### Prerequisites
+- Python 3.8+
+- pip (Python package installer)
+
+### Setup Instructions
+
+1. **Clone the repository and navigate to project directory:**
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On macOS/Linux
+   git clone <repository-url>
+   cd hrm
    ```
 
-2. **Setup Backend:**
+2. **Create and activate virtual environment:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # On macOS/Linux
+   # On Windows use: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install django python-dotenv gunicorn
+   pip freeze > backend/requirements.txt
+   ```
+
+4. **Setup environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your actual configuration values
+   ```
+
+5. **Setup Backend:**
    ```bash
    cd backend
-   pip install -r requirements.txt
    python manage.py migrate
    python manage.py createsuperuser
    python manage.py runserver
