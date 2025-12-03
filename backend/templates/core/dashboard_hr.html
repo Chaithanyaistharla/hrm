@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}HR Dashboard - HRMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-users-cog text-primary me-2"></i>
+                        HR Management Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Welcome back, {{ user.get_full_name|default:user.username }} | {{ role_display }}</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-danger fs-6">{{ role_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Management Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-rocket text-warning me-2"></i>Quick Management Actions
+                    </h5>
+                    <div class="row g-2">
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <button class="btn btn-outline-primary w-100">
+                                <i class="fas fa-user-plus"></i> Add Employee
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <button class="btn btn-outline-success w-100">
+                                <i class="fas fa-check"></i> Approve Leaves
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <button class="btn btn-outline-info w-100">
+                                <i class="fas fa-chart-line"></i> View Reports
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <button class="btn btn-outline-warning w-100">
+                                <i class="fas fa-bullhorn"></i> Announcements
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <button class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-cog"></i> Settings
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <button class="btn btn-outline-dark w-100">
+                                <i class="fas fa-download"></i> Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="row mb-4">
+        <!-- Organization Overview -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ org_data.total_employees }}</h4>
+                            <p class="mb-0">Total Employees</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>
+                            <i class="fas fa-arrow-up"></i> 
+                            {{ org_data.new_hires_this_month }} new hires this month
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Management -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ leave_management.pending_approvals }}</h4>
+                            <p class="mb-0">Pending Approvals</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-times fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>
+                            <i class="fas fa-check text-success"></i> 
+                            {{ leave_management.approved_today }} approved today
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Overview -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ attendance_overview.present_today }}</h4>
+                            <p class="mb-0">Present Today</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-check fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>
+                            <i class="fas fa-exclamation-triangle text-warning"></i> 
+                            {{ attendance_overview.late_arrivals }} late arrivals
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Overview -->
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ project_overview.active_projects }}</h4>
+                            <p class="mb-0">Active Projects</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-project-diagram fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>
+                            <i class="fas fa-trophy text-warning"></i> 
+                            {{ project_overview.completed_this_month }} completed this month
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Widgets Row -->
+    <div class="row mb-4">
+        <!-- Leave Management Details -->
+        <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Leave Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-4 text-center">
+                            <h3 class="text-warning mb-0">{{ leave_management.pending_approvals }}</h3>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h3 class="text-success mb-0">{{ leave_management.approved_today }}</h3>
+                            <small class="text-muted">Approved Today</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h3 class="text-danger mb-0">{{ leave_management.rejected_today }}</h3>
+                            <small class="text-muted">Rejected Today</small>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Action Required:</strong><br>
+                        {{ leave_management.pending_approvals }} leave requests need your review.
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-warning btn-sm">
+                        <i class="fas fa-list"></i> Review All Requests
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Management Details -->
+        <div class="col-lg-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>Attendance Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-4 text-center">
+                            <h3 class="text-success mb-0">{{ attendance_overview.present_today }}</h3>
+                            <small class="text-muted">Present</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h3 class="text-danger mb-0">{{ attendance_overview.absent_today }}</h3>
+                            <small class="text-muted">Absent</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h3 class="text-warning mb-0">{{ attendance_overview.late_arrivals }}</h3>
+                            <small class="text-muted">Late</small>
+                        </div>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                    </div>
+                    <small class="text-muted">
+                        85% attendance rate today ({{ attendance_overview.present_today }}/{{ org_data.active_employees }} employees)
+                    </small>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-success btn-sm">
+                        <i class="fas fa-chart-bar"></i> Detailed Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Tools Row -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks text-primary me-2"></i>Recent HR Activities
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-user-plus text-success me-2"></i>
+                                <strong>New employee onboarded:</strong> John Doe - Software Developer
+                            </div>
+                            <small class="text-muted">2 hours ago</small>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-check text-primary me-2"></i>
+                                <strong>Leave approved:</strong> Jane Smith - Annual Leave (Dec 20-22)
+                            </div>
+                            <small class="text-muted">4 hours ago</small>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                <strong>Attendance alert:</strong> 3 employees with consecutive absences
+                            </div>
+                            <small class="text-muted">1 day ago</small>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-chart-line text-info me-2"></i>
+                                <strong>Monthly report generated:</strong> November Attendance Summary
+                            </div>
+                            <small class="text-muted">2 days ago</small>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-bullhorn text-secondary me-2"></i>
+                                <strong>Announcement posted:</strong> Holiday Schedule Updated
+                            </div>
+                            <small class="text-muted">3 days ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bell text-warning me-2"></i>HR Alerts & Notifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <strong><i class="fas fa-exclamation-circle"></i> Urgent:</strong><br>
+                        {{ leave_management.pending_approvals }} leave requests require immediate attention.
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong><i class="fas fa-clock"></i> Reminder:</strong><br>
+                        Monthly performance reviews due by Dec 15th.
+                    </div>
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle"></i> Notice:</strong><br>
+                        New compliance training module available.
+                    </div>
+                    <div class="alert alert-success">
+                        <strong><i class="fas fa-chart-line"></i> Achievement:</strong><br>
+                        95% attendance rate this month - Best in 6 months!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add HR dashboard-specific JavaScript here
+    console.log('HR Dashboard loaded');
+    
+    // Auto-refresh alerts every 30 seconds (placeholder)
+    // setInterval(() => {
+    //     console.log('Refreshing HR alerts...');
+    // }, 30000);
+</script>
+{% endblock %}

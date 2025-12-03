@@ -13,6 +13,8 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='core/login.html'), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/employee/', views.dashboard_employee_view, name='dashboard_employee'),
+    path('dashboard/hr/', views.dashboard_hr_view, name='dashboard_hr'),
     path('profile/', views.profile_view, name='profile'),
     path('directory/', views.org_directory, name='org_directory'),
     

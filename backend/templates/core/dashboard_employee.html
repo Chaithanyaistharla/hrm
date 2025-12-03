@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Dashboard - HRMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-tachometer-alt text-primary me-2"></i>
+                        Welcome back, {{ user.get_full_name|default:user.username }}!
+                    </h1>
+                    <p class="text-muted mb-0">{{ role_display }} Dashboard</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6">{{ role_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h5>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-success w-100">
+                                <i class="fas fa-sign-in-alt"></i> Check In
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-danger w-100">
+                                <i class="fas fa-sign-out-alt"></i> Check Out
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-info w-100">
+                                <i class="fas fa-calendar-plus"></i> Request Leave
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary w-100">
+                                <i class="fas fa-user-edit"></i> Update Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Widgets Row 1 -->
+    <div class="row mb-4">
+        <!-- Attendance Widget -->
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>My Attendance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-12 mb-3">
+                            <h3 class="text-success">{{ attendance_data.today_status }}</h3>
+                            <small class="text-muted">Today's Status</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ attendance_data.this_week_hours }}h</h4>
+                            <small class="text-muted">This Week</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-info">{{ attendance_data.this_month_days }}</h4>
+                            <small class="text-muted">Days This Month</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Last updated: Just now
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Widget -->
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-times me-2"></i>My Leaves
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 class="text-warning">{{ leave_data.pending_requests }}</h4>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-success">{{ leave_data.available_days }}</h4>
+                            <small class="text-muted">Available</small>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="alert alert-info py-2 mb-0">
+                                <strong>Upcoming:</strong><br>
+                                <small>{{ leave_data.upcoming_leaves }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> Leave balance as of today
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects Widget -->
+        <div class="col-lg-4 col-md-12 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>My Projects
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ project_data.active_projects }}</h4>
+                            <small class="text-muted">Active Projects</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-danger">{{ project_data.tasks_due_today }}</h4>
+                            <small class="text-muted">Tasks Due Today</small>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="alert alert-primary py-2 mb-0">
+                                <strong>Recent Project:</strong><br>
+                                <small>{{ project_data.recent_project }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-tasks"></i> Updated hourly
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities Row -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history text-secondary me-2"></i>Recent Activities
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-sign-in-alt text-success me-2"></i>
+                                <strong>Checked in</strong> at 9:15 AM
+                            </div>
+                            <small class="text-muted">2 hours ago</small>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-tasks text-primary me-2"></i>
+                                <strong>Completed task</strong> in HRMS Development project
+                            </div>
+                            <small class="text-muted">4 hours ago</small>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-calendar-check text-info me-2"></i>
+                                <strong>Leave request approved</strong> for Dec 25-26
+                            </div>
+                            <small class="text-muted">1 day ago</small>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-user-edit text-warning me-2"></i>
+                                <strong>Profile updated</strong> - Contact information
+                            </div>
+                            <small class="text-muted">3 days ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bullhorn text-info me-2"></i>Announcements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Holiday Notice:</strong> Office will be closed on Dec 25-26 for Christmas holidays.
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>System Maintenance:</strong> HRMS will be under maintenance this Saturday 10 PM - 2 AM.
+                    </div>
+                    <div class="alert alert-success">
+                        <strong>New Feature:</strong> Mobile attendance marking is now available!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any dashboard-specific JavaScript here
+    console.log('Employee Dashboard loaded');
+</script>
+{% endblock %}

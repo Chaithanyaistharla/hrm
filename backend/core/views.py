@@ -57,19 +57,88 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
-    """Dashboard view showing user info and role-based content."""
+    """Role-based dashboard redirect view."""
     user = request.user
     
+    # Redirect based on user role
+    if user.is_hr() or user.is_admin_role():
+        return redirect('dashboard_hr')
+    else:
+        # Default to employee dashboard for EMPLOYEE and MANAGER roles
+        return redirect('dashboard_employee')
+
+
+@login_required
+def dashboard_employee_view(request):
+    """Employee dashboard with attendance, leaves, and projects widgets."""
+    user = request.user
+    
+    # Sample data for placeholders - will be replaced with real data later
     context = {
         'user': user,
         'role': user.role,
-        'role_display': user.role_name if user.role else 'No Role Assigned',
-        'is_hr': user.is_hr() if user.role else False,
-        'is_manager': user.is_manager() if user.role else False,
-        'is_admin_role': user.is_admin_role() if user.role else False,
+        'role_display': user.role_name if user.role else 'Employee',
+        # Attendance widget data
+        'attendance_data': {
+            'today_status': 'Not Checked In',
+            'this_week_hours': '32.5',
+            'this_month_days': '18',
+        },
+        # Leave widget data
+        'leave_data': {
+            'pending_requests': 2,
+            'available_days': 12,
+            'upcoming_leaves': 'Dec 25-26, 2025',
+        },
+        # Project widget data
+        'project_data': {
+            'active_projects': 3,
+            'tasks_due_today': 2,
+            'recent_project': 'HRMS Development',
+        },
     }
     
-    return render(request, 'core/dashboard.html', context)
+    return render(request, 'core/dashboard_employee.html', context)
+
+
+@login_required
+@hr_required
+def dashboard_hr_view(request):
+    """HR dashboard with organization-wide widgets and management tools."""
+    user = request.user
+    
+    # Sample data for placeholders - will be replaced with real data later
+    context = {
+        'user': user,
+        'role': user.role,
+        'role_display': user.role_name if user.role else 'HR',
+        # Organization overview widget data
+        'org_data': {
+            'total_employees': 45,
+            'new_hires_this_month': 3,
+            'active_employees': 42,
+        },
+        # Leave management widget data
+        'leave_management': {
+            'pending_approvals': 8,
+            'approved_today': 2,
+            'rejected_today': 1,
+        },
+        # Attendance overview widget data
+        'attendance_overview': {
+            'present_today': 38,
+            'absent_today': 4,
+            'late_arrivals': 2,
+        },
+        # Project management widget data
+        'project_overview': {
+            'active_projects': 12,
+            'completed_this_month': 3,
+            'overdue_projects': 1,
+        },
+    }
+    
+    return render(request, 'core/dashboard_hr.html', context)
 
 
 @login_required
