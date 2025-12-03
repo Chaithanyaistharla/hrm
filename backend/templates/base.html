@@ -112,6 +112,31 @@
                             </div>
                         </div>
                         
+                        <!-- Attendance Management -->
+                        <div class="relative group">
+                            <button class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-1 group-hover:bg-blue-700">
+                                <i class="fas fa-clock"></i>
+                                <span>Attendance</span>
+                                <i class="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                <a href="{% url 'attendance_page' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-play-circle text-blue-600"></i>
+                                    <span>Clock In/Out</span>
+                                </a>
+                                <a href="{% url 'employee_attendance_dashboard' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-calendar-alt text-blue-600"></i>
+                                    <span>My Attendance</span>
+                                </a>
+                                {% if user.is_manager or user.is_hr or user.is_admin_role %}
+                                <a href="{% url 'team_attendance_view' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-users-clock text-blue-600"></i>
+                                    <span>Team Attendance</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
                         <!-- HR Management (Role-based) -->
                         {% if user.is_hr or user.is_admin_role %}
                         <div class="relative group">
@@ -204,6 +229,18 @@
                     <a href="{% url 'employee_profile' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                         <i class="fas fa-user-circle mr-2"></i>Employee Profile
                     </a>
+                    <!-- Attendance Links -->
+                    <a href="{% url 'attendance_page' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-play-circle mr-2"></i>Clock In/Out
+                    </a>
+                    <a href="{% url 'employee_attendance_dashboard' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-calendar-alt mr-2"></i>My Attendance
+                    </a>
+                    {% if user.is_manager or user.is_hr or user.is_admin_role %}
+                    <a href="{% url 'team_attendance_view' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-users-clock mr-2"></i>Team Attendance
+                    </a>
+                    {% endif %}
                     {% if user.is_hr or user.is_admin_role %}
                     <a href="{% url 'employee_directory' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                         <i class="fas fa-address-book mr-2"></i>Employee Directory

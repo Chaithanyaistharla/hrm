@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance - HRMS{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-clock text-blue-600 mr-3"></i>
+            Attendance Management
+        </h1>
+        
+        <!-- Current Status Card -->
+        <div id="status-card" class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Current Status</h2>
+            <div id="current-status" class="space-y-2">
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-gray-400 rounded-full" id="status-indicator"></div>
+                    <span id="status-text" class="text-gray-600">Loading...</span>
+                </div>
+                <div id="status-details" class="text-sm text-gray-500"></div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <button id="clock-in-btn" 
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                <i class="fas fa-play mr-2"></i>
+                Clock In
+            </button>
+            <button id="clock-out-btn" 
+                    class="bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center"
+                    disabled>
+                <i class="fas fa-stop mr-2"></i>
+                Clock Out
+            </button>
+        </div>
+        
+        <!-- Today's Details -->
+        <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Today's Details</h3>
+            <div class="grid md:grid-cols-2 gap-4" id="details-grid">
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date:</span>
+                        <span id="current-date" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Clock In:</span>
+                        <span id="clock-in-time" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Clock Out:</span>
+                        <span id="clock-out-time" class="font-medium">-</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Working Hours:</span>
+                        <span id="working-hours" class="font-medium">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">IP Address:</span>
+                        <span id="ip-address" class="font-medium text-xs">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message Area -->
+        <div id="message-area" class="mt-6"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const clockInBtn = document.getElementById('clock-in-btn');
+    const clockOutBtn = document.getElementById('clock-out-btn');
+    const messageArea = document.getElementById('message-area');
+    
+    // Load current status on page load
+    loadAttendanceStatus();
+    
+    // Clock In Event
+    clockInBtn.addEventListener('click', function() {
+        clockInBtn.disabled = true;
+        clockInBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Clocking In...';
+        
+        fetch('{% url "attendance_clock_in" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            showMessage(data.message, data.status);
+            loadAttendanceStatus();
+        })
+        .catch(error => {
+            showMessage('Clock-in failed: ' + error.message, 'error');
+        })
+        .finally(() => {
+            clockInBtn.disabled = false;
+            clockInBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Clock In';
+        });
+    });
+    
+    // Clock Out Event
+    clockOutBtn.addEventListener('click', function() {
+        clockOutBtn.disabled = true;
+        clockOutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Clocking Out...';
+        
+        fetch('{% url "attendance_clock_out" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            showMessage(data.message, data.status);
+            loadAttendanceStatus();
+        })
+        .catch(error => {
+            showMessage('Clock-out failed: ' + error.message, 'error');
+        })
+        .finally(() => {
+            clockOutBtn.disabled = false;
+            clockOutBtn.innerHTML = '<i class="fas fa-stop mr-2"></i>Clock Out';
+        });
+    });
+    
+    // Load current attendance status
+    function loadAttendanceStatus() {
+        fetch('{% url "attendance_status" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateStatusDisplay(data.data);
+            } else {
+                showMessage('Failed to load attendance status', 'error');
+            }
+        })
+        .catch(error => {
+            showMessage('Error loading status: ' + error.message, 'error');
+        });
+    }
+    
+    // Update status display
+    function updateStatusDisplay(data) {
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const statusDetails = document.getElementById('status-details');
+        
+        // Update basic info
+        document.getElementById('current-date').textContent = data.date;
+        document.getElementById('clock-in-time').textContent = data.clock_in_time ? 
+            new Date(data.clock_in_time).toLocaleTimeString() : '-';
+        document.getElementById('clock-out-time').textContent = data.clock_out_time ? 
+            new Date(data.clock_out_time).toLocaleTimeString() : '-';
+        document.getElementById('ip-address').textContent = data.ip_address || '-';
+        
+        // Update status and working hours
+        if (data.is_clocked_out) {
+            statusIndicator.className = 'w-3 h-3 bg-gray-500 rounded-full';
+            statusText.textContent = 'Work completed for today';
+            statusDetails.textContent = `Total working hours: ${data.working_hours} hours`;
+            document.getElementById('working-hours').textContent = `${data.working_hours} hours`;
+            
+            clockInBtn.disabled = true;
+            clockOutBtn.disabled = true;
+        } else if (data.is_clocked_in) {
+            statusIndicator.className = 'w-3 h-3 bg-green-500 rounded-full animate-pulse';
+            statusText.textContent = 'Currently clocked in';
+            statusDetails.textContent = `Current working hours: ${data.current_working_hours} hours`;
+            document.getElementById('working-hours').textContent = `${data.current_working_hours} hours (ongoing)`;
+            
+            clockInBtn.disabled = true;
+            clockOutBtn.disabled = false;
+        } else {
+            statusIndicator.className = 'w-3 h-3 bg-red-500 rounded-full';
+            statusText.textContent = 'Not clocked in today';
+            statusDetails.textContent = 'Click Clock In to start your workday';
+            document.getElementById('working-hours').textContent = '-';
+            
+            clockInBtn.disabled = false;
+            clockOutBtn.disabled = true;
+        }
+    }
+    
+    // Show message
+    function showMessage(message, type) {
+        const messageArea = document.getElementById('message-area');
+        const alertClass = type === 'success' ? 'bg-green-100 border-green-500 text-green-700' :
+                          type === 'warning' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' :
+                          'bg-red-100 border-red-500 text-red-700';
+        
+        messageArea.innerHTML = `
+            <div class="border-l-4 ${alertClass} p-4 rounded">
+                <p class="font-medium">${message}</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            messageArea.innerHTML = '';
+        }, 5000);
+    }
+    
+    // Get CSRF Token
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value ||
+               document.querySelector('meta[name=csrf-token]').getAttribute('content') ||
+               '';
+    }
+    
+    // Refresh status every 30 seconds
+    setInterval(loadAttendanceStatus, 30000);
+});
+</script>
+{% endblock %}

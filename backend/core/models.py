@@ -303,6 +303,38 @@ class Attendance(models.Model):
     
     def __str__(self):
         return f"{self.employee.get_full_name()} - {self.date}"
+    
+    @property
+    def working_hours(self):
+        """Calculate total working hours for the day."""
+        if self.login_time and self.logout_time:
+            duration = self.logout_time - self.login_time
+            return round(duration.total_seconds() / 3600, 2)
+        return None
+    
+    @property
+    def current_working_hours(self):
+        """Calculate current working hours if still clocked in."""
+        if self.login_time and not self.logout_time:
+            from django.utils import timezone
+            duration = timezone.now() - self.login_time
+            return round(duration.total_seconds() / 3600, 2)
+        return None
+    
+    @property
+    def is_clocked_in(self):
+        """Check if employee is currently clocked in."""
+        return self.login_time is not None and self.logout_time is None
+    
+    @property
+    def status(self):
+        """Get current status of attendance."""
+        if not self.login_time:
+            return 'Not clocked in'
+        elif not self.logout_time:
+            return 'Clocked in'
+        else:
+            return 'Completed'
 
 
 class Leave(models.Model):

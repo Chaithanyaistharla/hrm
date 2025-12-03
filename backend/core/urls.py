@@ -28,5 +28,15 @@ urlpatterns = [
     path('test/hr/', views.hr_only_view, name='hr_test'),
     path('test/admin/', views.admin_only_view, name='admin_test'),
     
+    # Attendance management
+    path('attendance/', views.attendance_page, name='attendance_page'),
+    path('attendance/dashboard/', views.employee_attendance_dashboard, name='employee_attendance_dashboard'),
+    path('attendance/team/', views.team_attendance_view, name='team_attendance_view'),
+    
+    # Attendance API endpoints
+    path('attendance/clock-in/', views.clock_in_api, name='attendance_clock_in'),
+    path('attendance/clock-out/', views.clock_out_api, name='attendance_clock_out'),
+    path('attendance/status/', views.attendance_status_api, name='attendance_status'),
+    
     path('', home_redirect, name='home'),
 ]
