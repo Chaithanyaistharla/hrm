@@ -8,6 +8,7 @@ from django.views.decorators.cache import never_cache
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from .decorators import role_required, hr_required, admin_required
 from .models import User, EmployeeProfile
 from .middleware import hr_or_admin_required, manager_or_above_required
 
@@ -273,8 +274,29 @@ def employee_search_api(request):
             'username': emp.username,
             'employee_id': emp.employee_id or '',
             'department': emp.department or '',
-            'role': emp.role.get_name_display() if emp.role else 'No Role',
+            'role': emp.get_role_display() if emp.role else 'No Role',
             'email': emp.email,
         })
     
     return JsonResponse({'results': results})
+
+
+# Test views for role-based access control
+@hr_required
+def hr_only_view(request):
+    """Test view that only HR and Admin can access."""
+    return render(request, 'core/test_view.html', {
+        'title': 'HR Only Area',
+        'message': 'This view is only accessible by HR and Admin users.',
+        'user_role': request.user.role
+    })
+
+
+@admin_required
+def admin_only_view(request):
+    """Test view that only Admin can access."""
+    return render(request, 'core/test_view.html', {
+        'title': 'Admin Only Area', 
+        'message': 'This view is only accessible by Admin users.',
+        'user_role': request.user.role
+    })

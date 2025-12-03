@@ -1,5 +1,6 @@
 from django.urls import path
 from django.shortcuts import redirect
+from django.contrib.auth.views import LoginView, LogoutView
 from . import views
 
 def home_redirect(request):
@@ -9,8 +10,8 @@ def home_redirect(request):
     return redirect('login')
 
 urlpatterns = [
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
+    path('login/', LoginView.as_view(template_name='core/login.html'), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('profile/', views.profile_view, name='profile'),
     
@@ -19,6 +20,10 @@ urlpatterns = [
     path('employee/profile/edit/', views.employee_profile_edit_view, name='employee_profile_edit'),
     path('employee/directory/', views.employee_directory_view, name='employee_directory'),
     path('employee/<int:user_id>/', views.employee_detail_view, name='employee_detail'),
+    
+    # Test URLs for role-based access control
+    path('test/hr/', views.hr_only_view, name='hr_test'),
+    path('test/admin/', views.admin_only_view, name='admin_test'),
     
     path('', home_redirect, name='home'),
 ]

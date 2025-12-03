@@ -5,6 +5,16 @@ from django.contrib import messages
 import re
 
 
+class RoleRequiredMiddleware:
+    def __init__(self, get_response): 
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        # skip anon and admin pages
+        # Add per-path rules or decorator-based checks later
+        return self.get_response(request)
+
+
 class RoleBasedAccessMiddleware:
     """
     Middleware to handle role-based access control.
