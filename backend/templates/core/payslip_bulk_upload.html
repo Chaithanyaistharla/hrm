@@ -1,0 +1,627 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bulk Upload Payslips - HRMS{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-10 animate-fade-in">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">Bulk Upload Payslips</h1>
+                    <p class="text-lg text-gray-600 font-medium">Upload multiple payslips using a CSV file</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'payslip_list' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to Payslips
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-6 mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">How to use bulk upload</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Download the CSV template below</li>
+                            <li>Fill in the payslip data for each employee</li>
+                            <li>Upload the completed CSV file</li>
+                            <li>Review and confirm the payslips before saving</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download Template -->
+        <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">CSV Template</h3>
+                    <p class="mt-1 text-sm text-gray-500">Download the template file to get started with the correct format</p>
+                </div>
+                <button onclick="downloadTemplate()" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Download Template
+                </button>
+            </div>
+            
+            <!-- Template Format Info -->
+            <div class="mt-6 border-t border-gray-200 pt-6">
+                <h4 class="text-sm font-medium text-gray-900 mb-3">Required CSV Columns:</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <div class="text-sm text-gray-600"><strong>employee_email</strong> - Employee's email address</div>
+                        <div class="text-sm text-gray-600"><strong>month</strong> - Month (1-12)</div>
+                        <div class="text-sm text-gray-600"><strong>year</strong> - Year (e.g., 2024)</div>
+                        <div class="text-sm text-gray-600"><strong>basic</strong> - Basic salary amount</div>
+                        <div class="text-sm text-gray-600"><strong>hra</strong> - House Rent Allowance (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>allowances</strong> - Other allowances (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>overtime_hours</strong> - Overtime hours (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>overtime_pay</strong> - Overtime pay amount (optional)</div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="text-sm text-gray-600"><strong>bonus</strong> - Bonus amount (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>income_tax</strong> - Income tax deduction (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>provident_fund</strong> - PF deduction (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>professional_tax</strong> - Professional tax (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>deductions</strong> - Other deductions (optional)</div>
+                        <div class="text-sm text-gray-600"><strong>status</strong> - DRAFT, PROCESSED, PAID, or CANCELLED</div>
+                        <div class="text-sm text-gray-600"><strong>pay_date</strong> - Payment date (YYYY-MM-DD, optional)</div>
+                        <div class="text-sm text-gray-600"><strong>notes</strong> - Additional notes (optional)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="bg-white shadow-sm rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Upload CSV File</h3>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                {% csrf_token %}
+                <div class="px-6 py-6">
+                    {% if form.non_field_errors %}
+                        <div class="mb-6 p-4 border-l-4 border-red-400 bg-red-50">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">Upload Error</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        {% for error in form.non_field_errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="space-y-6">
+                        <!-- File Upload -->
+                        <div>
+                            <label for="{{ form.csv_file.id_for_label }}" 
+                                   class="block text-sm font-medium text-gray-700 mb-2">
+                                CSV File
+                            </label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors"
+                                 id="file-drop-area">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="{{ form.csv_file.id_for_label }}" 
+                                               class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                                            <span>Upload a CSV file</span>
+                                            {{ form.csv_file }}
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">CSV files up to 10MB</p>
+                                </div>
+                            </div>
+                            {% if form.csv_file.errors %}
+                                <div class="mt-2 text-sm text-red-600">
+                                    {% for error in form.csv_file.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div id="file-info" class="mt-2 hidden">
+                                <div class="bg-green-50 border border-green-200 rounded-md p-3">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-green-800" id="file-name"></p>
+                                            <p class="text-sm text-green-700" id="file-size"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Processing Options -->
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Processing Options</label>
+                            <div class="mt-2 space-y-3">
+                                <div class="flex items-center">
+                                    <input type="checkbox" 
+                                           name="skip_duplicates" 
+                                           id="skip_duplicates"
+                                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label for="skip_duplicates" class="ml-2 block text-sm text-gray-900">
+                                        Skip duplicate payslips (same employee and period)
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" 
+                                           name="validate_only" 
+                                           id="validate_only"
+                                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label for="validate_only" class="ml-2 block text-sm text-gray-900">
+                                        Validate only (don't save, just check for errors)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                    <a href="{% url 'payslip_list' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            id="upload-button"
+                            disabled
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <span id="upload-text">Process CSV</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Upload Results (shown after processing) -->
+        {% if upload_results %}
+            <div class="mt-8 bg-white shadow-sm rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Upload Results</h3>
+                </div>
+                
+                <div class="px-6 py-6">
+                    <!-- Summary -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-blue-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-blue-600">{{ upload_results.total_processed }}</div>
+                            <div class="text-sm text-blue-800">Total Processed</div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-green-600">{{ upload_results.successful }}</div>
+                            <div class="text-sm text-green-800">Successful</div>
+                        </div>
+                        <div class="bg-yellow-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-yellow-600">{{ upload_results.skipped }}</div>
+                            <div class="text-sm text-yellow-800">Skipped</div>
+                        </div>
+                        <div class="bg-red-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-red-600">{{ upload_results.failed }}</div>
+                            <div class="text-sm text-red-800">Failed</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Errors -->
+                    {% if upload_results.errors %}
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-red-800 mb-3">Errors Found:</h4>
+                            <div class="space-y-2">
+                                {% for error in upload_results.errors %}
+                                    <div class="text-sm text-red-700">
+                                        <strong>Row {{ error.row }}:</strong> {{ error.message }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// File upload handling
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.csv_file.id_for_label }}');
+    const fileDropArea = document.getElementById('file-drop-area');
+    const fileInfo = document.getElementById('file-info');
+    const uploadButton = document.getElementById('upload-button');
+    
+    fileInput.addEventListener('change', handleFileSelect);
+    
+    // Drag and drop handling
+    fileDropArea.addEventListener('dragover', handleDragOver);
+    fileDropArea.addEventListener('drop', handleFileDrop);
+    fileDropArea.addEventListener('dragenter', handleDragEnter);
+    fileDropArea.addEventListener('dragleave', handleDragLeave);
+    
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            displayFileInfo(file);
+            uploadButton.disabled = false;
+        } else {
+            hideFileInfo();
+            uploadButton.disabled = true;
+        }
+    }
+    
+    function handleDragOver(event) {
+        event.preventDefault();
+    }
+    
+    function handleDragEnter(event) {
+        event.preventDefault();
+        fileDropArea.classList.add('border-indigo-400', 'bg-indigo-50');
+    }
+    
+    function handleDragLeave(event) {
+        event.preventDefault();
+        if (!fileDropArea.contains(event.relatedTarget)) {
+            fileDropArea.classList.remove('border-indigo-400', 'bg-indigo-50');
+        }
+    }
+    
+    function handleFileDrop(event) {
+        event.preventDefault();
+        fileDropArea.classList.remove('border-indigo-400', 'bg-indigo-50');
+        
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect({ target: { files: files } });
+        }
+    }
+    
+    function displayFileInfo(file) {
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        fileInfo.classList.remove('hidden');
+    }
+    
+    function hideFileInfo() {
+        fileInfo.classList.add('hidden');
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Form submission handling
+    document.getElementById('uploadForm').addEventListener('submit', function() {
+        uploadButton.disabled = true;
+        document.getElementById('upload-text').textContent = 'Processing...';
+    });
+});
+
+// Download template function
+function downloadTemplate() {
+    const csvContent = `employee_email,month,year,basic,hra,allowances,overtime_hours,overtime_pay,bonus,income_tax,provident_fund,professional_tax,deductions,status,pay_date,notes
+john.doe@company.com,1,2024,5000,1500,500,0,0,1000,750,600,200,0,PROCESSED,2024-01-31,Regular monthly salary
+jane.smith@company.com,1,2024,6000,1800,600,5,250,0,900,720,200,0,PAID,2024-01-31,Includes overtime for project work`;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'payslip_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}
+</script>
+
+<style>
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+.animate-slide-in-up {
+    animation: slide-in-up 0.6s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Enhanced card styling */
+.bg-white, .bg-gradient-to-r {
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-white:hover {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+}
+
+/* Instructions card */
+.bg-gradient-to-r.from-blue-50 {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #93c5fd;
+    position: relative;
+}
+
+.bg-gradient-to-r.from-blue-50::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+/* Icon enhancements */
+.w-12.h-12.bg-gradient-to-r {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 1rem;
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.w-16.h-16.bg-gradient-to-r {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+}
+
+.w-20.h-20.bg-gradient-to-r {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 1.5rem;
+    box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+}
+
+/* Button enhancements */
+.bg-gradient-to-r.from-green-600,
+.bg-gradient-to-r.from-indigo-600 {
+    border-radius: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-gradient-to-r.from-green-600::before,
+.bg-gradient-to-r.from-indigo-600::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.bg-gradient-to-r.from-green-600:hover::before,
+.bg-gradient-to-r.from-indigo-600:hover::before {
+    left: 100%;
+}
+
+.bg-gradient-to-r.from-green-600:hover,
+.bg-gradient-to-r.from-indigo-600:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Drop zone enhancements */
+#drop-zone {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 3px dashed #cbd5e1;
+    border-radius: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#drop-zone::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#drop-zone:hover::before {
+    opacity: 1;
+}
+
+#drop-zone.dragover {
+    border-color: #6366f1;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+    transform: scale(1.02);
+    box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
+}
+
+/* File info styling */
+#file-info {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 2px solid #a7f3d0;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+/* Form controls */
+input[type="checkbox"] {
+    transform: scale(1.2);
+    accent-color: #6366f1;
+}
+
+/* Header enhancements */
+.bg-gradient-to-r.from-indigo-600.to-purple-600 {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-gradient-to-r.from-indigo-600.to-purple-600::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml;charset=utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="white" opacity="0.2"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    opacity: 0.3;
+}
+
+/* Processing options styling */
+.space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+.space-y-4 label {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.space-y-4 label:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Cancel button */
+.border-gray-300 {
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+}
+
+.border-gray-300:hover {
+    background: #f8fafc;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Number badges */
+.w-6.h-6.bg-indigo-100 {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    border: 1px solid #a5b4fc;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .text-4xl {
+        font-size: 2.5rem;
+    }
+    
+    .max-w-5xl {
+        max-width: 100%;
+    }
+    
+    .p-8 {
+        padding: 1.5rem;
+    }
+    
+    .p-12 {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .text-4xl {
+        font-size: 2rem;
+    }
+    
+    .flex.justify-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .inline-flex {
+        justify-content: center;
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

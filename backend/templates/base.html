@@ -47,6 +47,55 @@
             transition: all 150ms ease-out;
         }
         
+        /* UNIFIED DESIGN SYSTEM - COMPREHENSIVE CSS FRAMEWORK */
+        
+        /* Base animations */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-in-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-in-right {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slide-in-left {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes bounce-in {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px currentColor; }
+            50% { box-shadow: 0 0 20px currentColor; }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+        
+        /* Animation classes */
+        .animate-fade-in { animation: fade-in 0.6s ease-out; }
+        .animate-slide-in-up { animation: slide-in-up 0.6s ease-out; }
+        .animate-slide-in-right { animation: slide-in-right 0.6s ease-out; }
+        .animate-slide-in-left { animation: slide-in-left 0.6s ease-out; }
+        .animate-bounce-in { animation: bounce-in 0.6s ease-out; }
+        .animate-pulse-glow { animation: pulse-glow 2s infinite; }
+        .animate-shimmer { animation: shimmer 2s infinite linear; }
+        
         /* Flash message animations */
         .alert-slide-down {
             animation: slideDown 0.3s ease-out;
@@ -55,7 +104,7 @@
         @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(-100%);
+                transform: translateY(-20px);
             }
             to {
                 opacity: 1;
@@ -293,7 +342,7 @@
 </head>
 <body class="h-full bg-gray-50 font-sans antialiased">
     <!-- Navigation Bar -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
+    <nav class="nav-enhanced shadow-enhanced-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo and Brand -->
@@ -329,6 +378,139 @@
                                     <i class="fas fa-user-circle text-blue-600"></i>
                                     <span>Employee Profile</span>
                                 </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Attendance Management -->
+                        <div class="relative group">
+                            <button class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-1 group-hover:bg-blue-700">
+                                <i class="fas fa-clock"></i>
+                                <span>Attendance</span>
+                                <i class="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                <a href="{% url 'attendance_page' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-play-circle text-blue-600"></i>
+                                    <span>Clock In/Out</span>
+                                </a>
+                                <a href="{% url 'employee_attendance_dashboard' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-calendar-alt text-blue-600"></i>
+                                    <span>My Attendance</span>
+                                </a>
+                                {% if user.is_manager or user.is_hr or user.is_admin_role %}
+                                <a href="{% url 'team_attendance_view' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-users-clock text-blue-600"></i>
+                                    <span>Team Attendance</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Leave Management -->
+                        <div class="relative group">
+                            <button class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-1 group-hover:bg-blue-700">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Leave</span>
+                                <i class="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                <a href="{% url 'apply_leave' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-plus text-blue-600"></i>
+                                    <span>Apply for Leave</span>
+                                </a>
+                                <a href="{% url 'my_leaves' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-history text-blue-600"></i>
+                                    <span>My Leave History</span>
+                                </a>
+                                {% if user.is_manager and not user.is_hr and not user.is_admin_role %}
+                                <a href="{% url 'manager_pending_leaves' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-tasks text-orange-600"></i>
+                                    <span>Team Pending Leaves</span>
+                                </a>
+                                {% endif %}
+                                {% if user.is_hr or user.is_admin_role %}
+                                <a href="{% url 'hr_all_leaves' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-users-cog text-purple-600"></i>
+                                    <span>All Leaves (HR)</span>
+                                </a>
+                                <a href="{% url 'manager_pending_leaves' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-tasks text-orange-600"></i>
+                                    <span>Pending Approvals</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Projects -->
+                        <div class="relative group">
+                            <button class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-1 group-hover:bg-blue-700">
+                                <i class="fas fa-project-diagram"></i>
+                                <span>Projects</span>
+                                <i class="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                <a href="{% url 'my_projects' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-user-check text-blue-600"></i>
+                                    <span>My Projects</span>
+                                </a>
+                                {% if user.is_hr or user.is_admin_role %}
+                                <a href="{% url 'project_list' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-list text-blue-600"></i>
+                                    <span>All Projects</span>
+                                </a>
+                                <a href="{% url 'project_create' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-plus text-blue-600"></i>
+                                    <span>Create Project</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Timesheets -->
+                        <div class="relative group">
+                            <button class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-1 group-hover:bg-blue-700">
+                                <i class="fas fa-stopwatch"></i>
+                                <span>Timesheets</span>
+                                <i class="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                <a href="{% url 'timesheet_entry' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-plus text-blue-600"></i>
+                                    <span>Add Entry</span>
+                                </a>
+                                <a href="{% url 'timesheet_weekly_summary' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-chart-bar text-blue-600"></i>
+                                    <span>Weekly Summary</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Payroll -->
+                        <div class="relative group">
+                            <button class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-1 group-hover:bg-blue-700">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Payroll</span>
+                                <i class="fas fa-chevron-down ml-1 text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                <a href="{% url 'my_payslips' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-receipt text-blue-600"></i>
+                                    <span>My Payslips</span>
+                                </a>
+                                {% if user.is_hr or user.is_admin_role %}
+                                <a href="{% url 'payslip_list' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-list text-blue-600"></i>
+                                    <span>All Payslips</span>
+                                </a>
+                                <a href="{% url 'payslip_create' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-plus text-blue-600"></i>
+                                    <span>Create Payslip</span>
+                                </a>
+                                <a href="{% url 'payslip_bulk_upload' %}" class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-upload text-blue-600"></i>
+                                    <span>Bulk Upload</span>
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                         
@@ -424,6 +606,33 @@
                     <a href="{% url 'employee_profile' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                         <i class="fas fa-user-circle mr-2"></i>Employee Profile
                     </a>
+                    <!-- Attendance Links -->
+                    <a href="{% url 'attendance_page' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-play-circle mr-2"></i>Clock In/Out
+                    </a>
+                    <a href="{% url 'employee_attendance_dashboard' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-calendar-alt mr-2"></i>My Attendance
+                    </a>
+                    {% if user.is_manager or user.is_hr or user.is_admin_role %}
+                    <a href="{% url 'team_attendance_view' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-users-clock mr-2"></i>Team Attendance
+                    </a>
+                    {% endif %}
+                    <!-- Payroll Links -->
+                    <a href="{% url 'my_payslips' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-receipt mr-2"></i>My Payslips
+                    </a>
+                    {% if user.is_hr or user.is_admin_role %}
+                    <a href="{% url 'payslip_list' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-list mr-2"></i>All Payslips
+                    </a>
+                    <a href="{% url 'payslip_create' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i>Create Payslip
+                    </a>
+                    <a href="{% url 'payslip_bulk_upload' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                        <i class="fas fa-upload mr-2"></i>Bulk Upload
+                    </a>
+                    {% endif %}
                     {% if user.is_hr or user.is_admin_role %}
                     <a href="{% url 'employee_directory' %}" class="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                         <i class="fas fa-address-book mr-2"></i>Employee Directory

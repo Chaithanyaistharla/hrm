@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Team Attendance{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .attendance-table {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .status-completed {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-clocked-in {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-not-clocked-in {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .filter-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-input, .form-select {
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-filter {
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-filter:hover {
+        background-color: #2563eb;
+    }
+    
+    .btn-reset {
+        background-color: #6b7280;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-reset:hover {
+        background-color: #4b5563;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .hours-cell {
+        font-weight: 600;
+    }
+    
+    .hours-good {
+        color: #059669;
+    }
+    
+    .hours-partial {
+        color: #d97706;
+    }
+    
+    .hours-none {
+        color: #dc2626;
+    }
+    
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1f2937;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    .pagination {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .pagination a, .pagination span {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        text-decoration: none;
+        color: #374151;
+        border-radius: 4px;
+    }
+    
+    .pagination a:hover {
+        background-color: #f3f4f6;
+    }
+    
+    .pagination .current {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Team Attendance</h1>
+            <p class="text-gray-600 mt-2">Monitor and track team attendance records</p>
+        </div>
+    </div>
+    
+    <!-- Statistics Summary -->
+    <div class="stats-summary">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_records }}</div>
+            <div class="stat-label">Total Records</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ date_from|date:"M d" }} - {{ date_to|date:"M d" }}</div>
+            <div class="stat-label">Date Range</div>
+        </div>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Filter Attendance Records</h2>
+        
+        <form method="get" class="filter-form">
+            <div class="form-group">
+                <label for="date_from">From Date</label>
+                <input type="date" id="date_from" name="date_from" value="{{ date_from }}" class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label for="date_to">To Date</label>
+                <input type="date" id="date_to" name="date_to" value="{{ date_to }}" class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" name="department" class="form-select">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept }}" {% if department == dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="employee_name">Employee Name</label>
+                <input type="text" id="employee_name" name="employee_name" value="{{ employee_name }}" 
+                       placeholder="Search by name..." class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn-filter">Apply Filters</button>
+            </div>
+            
+            <div class="form-group">
+                <a href="{% url 'team_attendance_view' %}" class="btn-reset">Reset</a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Attendance Table -->
+    <div class="attendance-table">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Employee
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Clock In
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Clock Out
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Hours
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Location (IP)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for record in attendance_records %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ record.employee.get_full_name }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {{ record.employee.department|default:"No Department" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ record.date|date:"M d, Y" }}
+                                {% if record.date == today %}
+                                    <span class="inline-block ml-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">Today</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if record.login_time %}
+                                    {{ record.login_time|time:"g:i A" }}
+                                {% else %}
+                                    <span class="text-gray-400">---</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if record.logout_time %}
+                                    {{ record.logout_time|time:"g:i A" }}
+                                {% else %}
+                                    <span class="text-gray-400">{% if record.login_time %}Working{% else %}---{% endif %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm hours-cell">
+                                {% if record.working_hours %}
+                                    <span class="{% if record.working_hours >= 8 %}hours-good{% elif record.working_hours >= 4 %}hours-partial{% else %}hours-none{% endif %}">
+                                        {{ record.working_hours }} hrs
+                                    </span>
+                                {% elif record.current_working_hours %}
+                                    <span class="hours-partial">{{ record.current_working_hours }} hrs</span>
+                                    <span class="text-xs text-gray-500">(Current)</span>
+                                {% else %}
+                                    <span class="hours-none">0 hrs</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge status-{{ record.status|lower|cut:' '|cut:"'" }}">
+                                    {{ record.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ record.ip|default:"---" }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                <div class="text-lg mb-2">No attendance records found</div>
+                                <p class="text-sm">Try adjusting your filter criteria or date range.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if attendance_records.has_other_pages %}
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if attendance_records.has_previous %}
+                    <a href="?{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.employee_name %}employee_name={{ request.GET.employee_name }}&{% endif %}page=1">&laquo; first</a>
+                    <a href="?{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.employee_name %}employee_name={{ request.GET.employee_name }}&{% endif %}page={{ attendance_records.previous_page_number }}">previous</a>
+                {% endif %}
+                
+                <span class="current">
+                    Page {{ attendance_records.number }} of {{ attendance_records.paginator.num_pages }}
+                </span>
+                
+                {% if attendance_records.has_next %}
+                    <a href="?{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.employee_name %}employee_name={{ request.GET.employee_name }}&{% endif %}page={{ attendance_records.next_page_number }}">next</a>
+                    <a href="?{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.employee_name %}employee_name={{ request.GET.employee_name }}&{% endif %}page={{ attendance_records.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

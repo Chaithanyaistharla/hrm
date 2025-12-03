@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Apply for Leave{% endblock %}
+
+{% block extra_css %}
+<style>
+    .leave-balance-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .balance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .balance-item {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .balance-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ffffff;
+    }
+    
+    .balance-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin-top: 0.25rem;
+    }
+    
+    .form-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .required {
+        color: #ef4444;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        ring: 2px;
+        ring-color: #3b82f6;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-secondary:hover {
+        background: #4b5563;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .info-box {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box h4 {
+        color: #1e40af;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-box ul {
+        color: #1e3a8a;
+        font-size: 0.875rem;
+        margin-left: 1.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Apply for Leave</h1>
+            <p class="text-gray-600 mt-2">Submit a new leave application</p>
+        </div>
+        <div>
+            <a href="{% url 'my_leaves' %}" class="btn-secondary">
+                <i class="fas fa-list mr-2"></i>My Leave History
+            </a>
+        </div>
+    </div>
+    
+    <!-- Leave Balance Card -->
+    {% if leave_balances %}
+    <div class="leave-balance-card">
+        <h2 class="text-xl font-semibold mb-4">
+            <i class="fas fa-chart-pie mr-2"></i>Your Leave Balance
+        </h2>
+        <div class="balance-grid">
+            {% for leave_type, balance in leave_balances.items %}
+                <div class="balance-item">
+                    <div class="balance-number">{{ balance }}</div>
+                    <div class="balance-label">{{ leave_type }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Leave Application Form -->
+    <div class="form-section">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Leave Application Details</h2>
+        
+        <!-- Information Box -->
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle mr-2"></i>Important Guidelines</h4>
+            <ul>
+                <li>Leave applications must be submitted at least 24 hours in advance</li>
+                <li>Ensure you have sufficient leave balance for the requested duration</li>
+                <li>Overlapping leave requests are not allowed</li>
+                <li>All fields marked with <span class="required">*</span> are mandatory</li>
+            </ul>
+        </div>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- Leave Type -->
+            <div class="form-group">
+                <label for="{{ form.leave_type.id_for_label }}" class="form-label">
+                    Leave Type <span class="required">*</span>
+                </label>
+                {{ form.leave_type }}
+                {% if form.leave_type.errors %}
+                    {% for error in form.leave_type.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Date Range -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="form-group">
+                    <label for="{{ form.from_date.id_for_label }}" class="form-label">
+                        From Date <span class="required">*</span>
+                    </label>
+                    {{ form.from_date }}
+                    {% if form.from_date.errors %}
+                        {% for error in form.from_date.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.to_date.id_for_label }}" class="form-label">
+                        To Date <span class="required">*</span>
+                    </label>
+                    {{ form.to_date }}
+                    {% if form.to_date.errors %}
+                        {% for error in form.to_date.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Reason -->
+            <div class="form-group">
+                <label for="{{ form.reason.id_for_label }}" class="form-label">
+                    Reason <span class="required">*</span>
+                </label>
+                {{ form.reason }}
+                {% if form.reason.errors %}
+                    {% for error in form.reason.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Form-level errors -->
+            {% if form.non_field_errors %}
+                <div class="error-message mb-4">
+                    {% for error in form.non_field_errors %}
+                        <div class="bg-red-50 border border-red-200 rounded-md p-3 mb-2">
+                            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>{{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane mr-2"></i>Submit Application
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-calculate leave duration
+document.addEventListener('DOMContentLoaded', function() {
+    const fromDate = document.getElementById('id_from_date');
+    const toDate = document.getElementById('id_to_date');
+    
+    function updateDuration() {
+        if (fromDate.value && toDate.value) {
+            const from = new Date(fromDate.value);
+            const to = new Date(toDate.value);
+            const timeDiff = to.getTime() - from.getTime();
+            const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+            
+            if (dayDiff > 0) {
+                // You can add duration display here if needed
+                console.log('Duration:', dayDiff, 'days');
+            }
+        }
+    }
+    
+    fromDate.addEventListener('change', updateDuration);
+    toDate.addEventListener('change', updateDuration);
+    
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    fromDate.setAttribute('min', today);
+    toDate.setAttribute('min', today);
+});
+</script>
+{% endblock %}

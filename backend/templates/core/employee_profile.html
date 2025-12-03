@@ -206,6 +206,64 @@
             </div>
         </div>
         
+        <!-- Leave Balance -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt"></i> Leave Balance
+                    <a href="{% url 'apply_leave' %}" class="btn btn-sm btn-success float-end">
+                        <i class="fas fa-plus"></i> Apply Leave
+                    </a>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-primary mb-1">{{ employee_profile.annual_leaves|default:"0" }}</h4>
+                            <small class="text-muted">Annual Leave</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-info mb-1">{{ employee_profile.sick_leaves|default:"0" }}</h4>
+                            <small class="text-muted">Sick Leave</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-success mb-1">{{ employee_profile.emergency_leaves|default:"0" }}</h4>
+                            <small class="text-muted">Emergency Leave</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-warning mb-1">{{ employee_profile.compensatory_leaves|default:"0" }}</h4>
+                            <small class="text-muted">Compensatory Leave</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-purple mb-1">{{ employee_profile.maternity_leaves|default:"0" }}</h4>
+                            <small class="text-muted">Maternity Leave</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-secondary mb-1">{{ employee_profile.paternity_leaves|default:"0" }}</h4>
+                            <small class="text-muted">Paternity Leave</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'my_leaves' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-history"></i> View Leave History
+                    </a>
+                </div>
+            </div>
+        </div>
+        
         <!-- Quick Stats -->
         <div class="card">
             <div class="card-header">

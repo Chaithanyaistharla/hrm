@@ -215,6 +215,32 @@ class EmployeeProfile(models.Model):
         help_text="Salary currency code"
     )
     
+    # Leave Balance Information
+    annual_leaves = models.IntegerField(
+        default=20,
+        help_text="Annual leave balance (in days)"
+    )
+    sick_leaves = models.IntegerField(
+        default=10,
+        help_text="Sick leave balance (in days)"
+    )
+    maternity_leaves = models.IntegerField(
+        default=90,
+        help_text="Maternity leave balance (in days)"
+    )
+    paternity_leaves = models.IntegerField(
+        default=15,
+        help_text="Paternity leave balance (in days)"
+    )
+    emergency_leaves = models.IntegerField(
+        default=5,
+        help_text="Emergency leave balance (in days)"
+    )
+    compensatory_leaves = models.IntegerField(
+        default=0,
+        help_text="Compensatory leave balance (in days)"
+    )
+    
     # System fields
     is_active = models.BooleanField(
         default=True,
@@ -303,6 +329,38 @@ class Attendance(models.Model):
     
     def __str__(self):
         return f"{self.employee.get_full_name()} - {self.date}"
+    
+    @property
+    def working_hours(self):
+        """Calculate total working hours for the day."""
+        if self.login_time and self.logout_time:
+            duration = self.logout_time - self.login_time
+            return round(duration.total_seconds() / 3600, 2)
+        return None
+    
+    @property
+    def current_working_hours(self):
+        """Calculate current working hours if still clocked in."""
+        if self.login_time and not self.logout_time:
+            from django.utils import timezone
+            duration = timezone.now() - self.login_time
+            return round(duration.total_seconds() / 3600, 2)
+        return None
+    
+    @property
+    def is_clocked_in(self):
+        """Check if employee is currently clocked in."""
+        return self.login_time is not None and self.logout_time is None
+    
+    @property
+    def status(self):
+        """Get current status of attendance."""
+        if not self.login_time:
+            return 'Not clocked in'
+        elif not self.logout_time:
+            return 'Clocked in'
+        else:
+            return 'Completed'
 
 
 class Leave(models.Model):
@@ -333,15 +391,26 @@ class Leave(models.Model):
     to_date = models.DateField()
     reason = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    
+    # Approval fields
     approver = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         null=True, 
         blank=True, 
         related_name='approvals', 
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        help_text="User who approved/rejected this leave"
     )
     applied_on = models.DateTimeField(auto_now_add=True)
     approved_on = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(
+        blank=True,
+        help_text="Reason for rejection if leave was rejected"
+    )
+    
+    # System tracking
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         ordering = ['-applied_on']
@@ -409,3 +478,243 @@ class ProjectMember(models.Model):
     
     def __str__(self):
         return f"{self.project.name} - {self.employee.get_full_name()} ({self.role or 'No Role'})"
+
+
+class TimesheetEntry(models.Model):
+    """
+    Model to track daily timesheet entries for employees.
+    """
+    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateField()
+    project = models.ForeignKey(Project, null=True, blank=True, on_delete=models.SET_NULL)
+    hours = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2,
+        help_text="Hours worked (maximum 24 hours per day)"
+    )
+    description = models.TextField(
+        blank=True,
+        help_text="Brief description of work performed"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-date', '-created_at']
+        unique_together = ['employee', 'date', 'project']
+        verbose_name = 'Timesheet Entry'
+        verbose_name_plural = 'Timesheet Entries'
+    
+    def __str__(self):
+        project_name = self.project.name if self.project else 'No Project'
+        return f"{self.employee.get_full_name()} - {self.date} - {project_name} ({self.hours}h)"
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from django.db.models import Sum
+        
+        # Validate that hours don't exceed 24 per day
+        if self.hours > 24:
+            raise ValidationError("Hours cannot exceed 24 per day.")
+        
+        if self.hours <= 0:
+            raise ValidationError("Hours must be greater than 0.")
+        
+        # Check total hours for the day don't exceed 24
+        existing_entries = TimesheetEntry.objects.filter(
+            employee=self.employee,
+            date=self.date
+        ).exclude(pk=self.pk)
+        
+        total_hours = existing_entries.aggregate(
+            total=Sum('hours')
+        )['total'] or 0
+        
+        if total_hours + self.hours > 24:
+            raise ValidationError(
+                f"Total hours for {self.date} would exceed 24. "
+                f"Current total: {total_hours}h, Adding: {self.hours}h"
+            )
+    
+    @classmethod
+    def get_weekly_summary(cls, employee, start_date, end_date):
+        """
+        Get weekly summary of hours for an employee.
+        """
+        entries = cls.objects.filter(
+            employee=employee,
+            date__range=[start_date, end_date]
+        ).select_related('project')
+        
+        total_hours = entries.aggregate(total=Sum('hours'))['total'] or 0
+        
+        # Group by project
+        project_totals = {}
+        for entry in entries:
+            project_key = entry.project.name if entry.project else 'No Project'
+            if project_key not in project_totals:
+                project_totals[project_key] = {'hours': 0, 'entries': []}
+            project_totals[project_key]['hours'] += entry.hours
+            project_totals[project_key]['entries'].append(entry)
+        
+        return {
+            'total_hours': total_hours,
+            'project_totals': project_totals,
+            'entries': entries
+        }
+
+
+class Payslip(models.Model):
+    """
+    Model to manage employee payslips and salary information.
+    """
+    employee = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE,
+        help_text="Employee for whom the payslip is generated"
+    )
+    month = models.IntegerField(
+        help_text="Month for which payslip is generated (1-12)"
+    )
+    year = models.IntegerField(
+        help_text="Year for which payslip is generated"
+    )
+    basic = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        help_text="Basic salary amount"
+    )
+    hra = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="House Rent Allowance"
+    )
+    allowances = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="Other allowances (transport, medical, etc.)"
+    )
+    deductions = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="Total deductions (tax, PF, insurance, etc.)"
+    )
+    net_pay = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="Net salary after deductions"
+    )
+    pay_date = models.DateField(
+        null=True, 
+        blank=True,
+        help_text="Date when salary was paid"
+    )
+    generated_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When the payslip was generated"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="When the payslip was last updated"
+    )
+    
+    # Additional payroll components
+    overtime_hours = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        help_text="Overtime hours worked"
+    )
+    overtime_pay = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Overtime payment"
+    )
+    bonus = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Bonus amount"
+    )
+    
+    # Tax and statutory deductions
+    income_tax = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Income tax deduction"
+    )
+    provident_fund = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Provident Fund deduction"
+    )
+    professional_tax = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Professional tax deduction"
+    )
+    
+    # Status and notes
+    STATUS_CHOICES = [
+        ('DRAFT', 'Draft'),
+        ('PROCESSED', 'Processed'),
+        ('PAID', 'Paid'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='DRAFT',
+        help_text="Payslip status"
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Additional notes or comments"
+    )
+    
+    class Meta:
+        ordering = ['-year', '-month', 'employee__first_name']
+        unique_together = ['employee', 'month', 'year']
+        verbose_name = 'Payslip'
+        verbose_name_plural = 'Payslips'
+    
+    def __str__(self):
+        from calendar import month_name
+        return f"{self.employee.get_full_name()} - {month_name[self.month]} {self.year}"
+    
+    @property
+    def gross_pay(self):
+        """Calculate gross pay (basic + allowances + overtime + bonus)."""
+        return self.basic + self.hra + self.allowances + self.overtime_pay + self.bonus
+    
+    @property
+    def total_deductions(self):
+        """Calculate total deductions."""
+        return self.deductions + self.income_tax + self.provident_fund + self.professional_tax
+    
+    def save(self, *args, **kwargs):
+        """Override save to auto-calculate net pay."""
+        # Auto-calculate net pay
+        self.net_pay = self.gross_pay - self.total_deductions
+        super().save(*args, **kwargs)
+    
+    @property
+    def month_name(self):
+        """Get month name."""
+        from calendar import month_name
+        return month_name[self.month]
+    
+    @property
+    def is_current_month(self):
+        """Check if this payslip is for current month."""
+        from datetime import date
+        today = date.today()
+        return self.year == today.year and self.month == today.month
