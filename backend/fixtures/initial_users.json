@@ -1,0 +1,70 @@
+[
+  {
+    "model": "core.user",
+    "pk": 1,
+    "fields": {
+      "username": "admin",
+      "email": "admin@hrm.in",
+      "first_name": "Admin",
+      "last_name": "User",
+      "is_staff": true,
+      "is_superuser": true,
+      "is_active": true,
+      "role": "ADMIN",
+      "employee_id": "EMP001",
+      "department": "Administration",
+      "phone_number": "+1234567890"
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 2,
+    "fields": {
+      "username": "hr_manager",
+      "email": "hr@hrm.in",
+      "first_name": "HR",
+      "last_name": "Manager",
+      "is_staff": true,
+      "is_superuser": false,
+      "is_active": true,
+      "role": "HR",
+      "employee_id": "EMP002",
+      "department": "Human Resources",
+      "phone_number": "+1234567891"
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 3,
+    "fields": {
+      "username": "team_manager",
+      "email": "manager@hrm.in",
+      "first_name": "Team",
+      "last_name": "Manager",
+      "is_staff": false,
+      "is_superuser": false,
+      "is_active": true,
+      "role": "MANAGER",
+      "employee_id": "EMP003",
+      "department": "Engineering",
+      "phone_number": "+1234567892"
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 4,
+    "fields": {
+      "username": "employee",
+      "email": "employee@hrm.in",
+      "first_name": "Regular",
+      "last_name": "Employee",
+      "is_staff": false,
+      "is_superuser": false,
+      "is_active": true,
+      "role": "EMPLOYEE",
+      "employee_id": "EMP004",
+      "department": "Engineering",
+      "phone_number": "+1234567893"
+    }
+  }
+]

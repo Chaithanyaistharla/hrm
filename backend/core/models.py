@@ -2,53 +2,21 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class Role(models.Model):
-    """
-    Role model for different user types in the HRMS system.
-    """
-    ROLE_CHOICES = [
-        ('EMPLOYEE', 'Employee'),
-        ('MANAGER', 'Manager'),
-        ('HR', 'HR'),
-        ('ADMIN', 'Admin'),
-    ]
-    
-    name = models.CharField(
-        max_length=20, 
-        choices=ROLE_CHOICES, 
-        unique=True,
-        help_text="Role name for the user"
-    )
-    description = models.TextField(
-        blank=True, 
-        help_text="Description of the role and its responsibilities"
-    )
-    is_active = models.BooleanField(
-        default=True,
-        help_text="Whether this role is currently active"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['name']
-        verbose_name = 'Role'
-        verbose_name_plural = 'Roles'
-    
-    def __str__(self):
-        return self.get_name_display()
+class Role(models.TextChoices):
+    EMPLOYEE = "EMPLOYEE", "Employee"
+    MANAGER = "MANAGER", "Manager"
+    HR = "HR", "HR"
+    ADMIN = "ADMIN", "Admin"
 
 
 class User(AbstractUser):
     """
     Custom User model extending AbstractUser with role assignment.
     """
-    role = models.ForeignKey(
-        Role,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='users',
+    role = models.CharField(
+        max_length=20, 
+        choices=Role.choices, 
+        default=Role.EMPLOYEE,
         help_text="User's role in the organization"
     )
     employee_id = models.CharField(
@@ -91,23 +59,23 @@ class User(AbstractUser):
     @property
     def role_name(self):
         """Return the role name or 'No Role' if not assigned."""
-        return self.role.get_name_display() if self.role else 'No Role'
+        return self.get_role_display() if self.role else 'No Role'
     
     def has_role(self, role_name):
         """Check if user has a specific role."""
-        return self.role and self.role.name == role_name
+        return self.role == role_name
     
     def is_hr(self):
         """Check if user is in HR role."""
-        return self.has_role('HR')
+        return self.has_role(Role.HR)
     
     def is_manager(self):
         """Check if user is a Manager."""
-        return self.has_role('MANAGER')
+        return self.has_role(Role.MANAGER)
     
     def is_admin_role(self):
         """Check if user is in Admin role (different from Django's is_staff)."""
-        return self.has_role('ADMIN')
+        return self.has_role(Role.ADMIN)
 
 
 class EmployeeProfile(models.Model):
