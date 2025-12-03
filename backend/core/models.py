@@ -280,3 +280,132 @@ class EmployeeProfile(models.Model):
         if user.is_manager() and self.manager == user:
             return True
         return False
+
+
+class Attendance(models.Model):
+    """
+    Model to track employee attendance with login/logout times and device information.
+    """
+    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateField()
+    login_time = models.DateTimeField(null=True, blank=True)
+    logout_time = models.DateTimeField(null=True, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    device_info = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    risk_score = models.FloatField(default=0.0)
+    
+    class Meta:
+        ordering = ['-date', '-login_time']
+        unique_together = ['employee', 'date']
+        verbose_name = 'Attendance'
+        verbose_name_plural = 'Attendance Records'
+    
+    def __str__(self):
+        return f"{self.employee.get_full_name()} - {self.date}"
+
+
+class Leave(models.Model):
+    """
+    Model to manage employee leave requests and approvals.
+    """
+    LEAVE_TYPE_CHOICES = [
+        ('ANNUAL', 'Annual Leave'),
+        ('SICK', 'Sick Leave'),
+        ('MATERNITY', 'Maternity Leave'),
+        ('PATERNITY', 'Paternity Leave'),
+        ('EMERGENCY', 'Emergency Leave'),
+        ('UNPAID', 'Unpaid Leave'),
+        ('COMPENSATORY', 'Compensatory Leave'),
+        ('OTHER', 'Other'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    
+    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    leave_type = models.CharField(max_length=50, choices=LEAVE_TYPE_CHOICES)
+    from_date = models.DateField()
+    to_date = models.DateField()
+    reason = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    approver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        null=True, 
+        blank=True, 
+        related_name='approvals', 
+        on_delete=models.SET_NULL
+    )
+    applied_on = models.DateTimeField(auto_now_add=True)
+    approved_on = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-applied_on']
+        verbose_name = 'Leave'
+        verbose_name_plural = 'Leaves'
+    
+    def __str__(self):
+        return f"{self.employee.get_full_name()} - {self.leave_type} ({self.from_date} to {self.to_date})"
+    
+    @property
+    def duration_days(self):
+        """Calculate the number of leave days."""
+        return (self.to_date - self.from_date).days + 1
+
+
+class Project(models.Model):
+    """
+    Model to represent projects within the organization.
+    """
+    STATUS_CHOICES = [
+        ('ACTIVE', 'Active'),
+        ('COMPLETED', 'Completed'),
+        ('ON_HOLD', 'On Hold'),
+        ('CANCELLED', 'Cancelled'),
+        ('PLANNING', 'Planning'),
+    ]
+    
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Project'
+        verbose_name_plural = 'Projects'
+    
+    def __str__(self):
+        return self.name
+    
+    @property
+    def member_count(self):
+        """Return the number of project members."""
+        return self.projectmember_set.count()
+
+
+class ProjectMember(models.Model):
+    """
+    Model to represent project membership and roles.
+    """
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    role = models.CharField(max_length=128, blank=True)
+    joined_on = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['project', 'employee']
+        ordering = ['project__name', 'employee__first_name']
+        verbose_name = 'Project Member'
+        verbose_name_plural = 'Project Members'
+    
+    def __str__(self):
+        return f"{self.project.name} - {self.employee.get_full_name()} ({self.role or 'No Role'})"
