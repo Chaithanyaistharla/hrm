@@ -38,5 +38,12 @@ urlpatterns = [
     path('attendance/clock-out/', views.clock_out_api, name='attendance_clock_out'),
     path('attendance/status/', views.attendance_status_api, name='attendance_status'),
     
+    # Leave Management
+    path('leave/apply/', views.apply_leave, name='apply_leave'),
+    path('leave/my-leaves/', views.my_leaves, name='my_leaves'),
+    path('leave/team/', views.manage_team_leaves, name='manage_team_leaves'),
+    path('leave/approve/<int:leave_id>/', views.approve_leave, name='approve_leave'),
+    path('leave/reject/<int:leave_id>/', views.reject_leave, name='reject_leave'),
+    
     path('', home_redirect, name='home'),
 ]

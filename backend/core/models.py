@@ -215,6 +215,32 @@ class EmployeeProfile(models.Model):
         help_text="Salary currency code"
     )
     
+    # Leave Balance Information
+    annual_leaves = models.IntegerField(
+        default=20,
+        help_text="Annual leave balance (in days)"
+    )
+    sick_leaves = models.IntegerField(
+        default=10,
+        help_text="Sick leave balance (in days)"
+    )
+    maternity_leaves = models.IntegerField(
+        default=90,
+        help_text="Maternity leave balance (in days)"
+    )
+    paternity_leaves = models.IntegerField(
+        default=15,
+        help_text="Paternity leave balance (in days)"
+    )
+    emergency_leaves = models.IntegerField(
+        default=5,
+        help_text="Emergency leave balance (in days)"
+    )
+    compensatory_leaves = models.IntegerField(
+        default=0,
+        help_text="Compensatory leave balance (in days)"
+    )
+    
     # System fields
     is_active = models.BooleanField(
         default=True,

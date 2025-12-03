@@ -6,15 +6,17 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.db import models
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import date
 import json
 from .decorators import role_required, hr_required, admin_required
-from .models import User, EmployeeProfile, Attendance
+from .models import User, EmployeeProfile, Attendance, Leave
 from .middleware import hr_or_admin_required, manager_or_above_required
+from .forms import LeaveApplicationForm
 
 
 @csrf_protect
@@ -719,3 +721,213 @@ def team_attendance_view(request):
     }
     
     return render(request, 'core/team_attendance_view.html', context)
+
+
+@login_required
+def apply_leave(request):
+    """
+    View for employees to apply for leave.
+    """
+    user_profile = None
+    if hasattr(request.user, 'employeeprofile'):
+        user_profile = request.user.employeeprofile
+    
+    if request.method == 'POST':
+        form = LeaveApplicationForm(request.POST, user=request.user)
+        if form.is_valid():
+            leave = form.save(commit=False)
+            leave.employee = request.user
+            leave.status = 'PENDING'
+            leave.save()
+            
+            messages.success(
+                request,
+                f'Your {leave.get_leave_type_display().lower()} application from '
+                f'{leave.from_date} to {leave.to_date} has been submitted successfully '
+                f'and is pending approval.'
+            )
+            return redirect('my_leaves')
+    else:
+        form = LeaveApplicationForm(user=request.user)
+    
+    # Get leave balances
+    leave_balances = {}
+    if user_profile:
+        leave_balances = {
+            'Annual Leave': user_profile.annual_leaves,
+            'Sick Leave': user_profile.sick_leaves,
+            'Maternity Leave': user_profile.maternity_leaves,
+            'Paternity Leave': user_profile.paternity_leaves,
+            'Emergency Leave': user_profile.emergency_leaves,
+            'Compensatory Leave': user_profile.compensatory_leaves,
+        }
+    
+    context = {
+        'form': form,
+        'leave_balances': leave_balances,
+        'user_profile': user_profile,
+    }
+    
+    return render(request, 'core/apply_leave.html', context)
+
+
+@login_required
+def my_leaves(request):
+    """
+    View for employees to see their leave history and status.
+    """
+    # Get all leaves for the current user
+    leaves = Leave.objects.filter(
+        employee=request.user
+    ).order_by('-applied_on')
+    
+    # Pagination
+    paginator = Paginator(leaves, 10)  # 10 leaves per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get leave balances
+    user_profile = None
+    leave_balances = {}
+    current_year_usage = {}
+    
+    if hasattr(request.user, 'employeeprofile'):
+        user_profile = request.user.employeeprofile
+        leave_balances = {
+            'ANNUAL': user_profile.annual_leaves,
+            'SICK': user_profile.sick_leaves,
+            'MATERNITY': user_profile.maternity_leaves,
+            'PATERNITY': user_profile.paternity_leaves,
+            'EMERGENCY': user_profile.emergency_leaves,
+            'COMPENSATORY': user_profile.compensatory_leaves,
+        }
+        
+        # Calculate current year usage
+        from datetime import datetime
+        current_year = datetime.now().year
+        
+        for leave_type in leave_balances.keys():
+            used_days = Leave.objects.filter(
+                employee=request.user,
+                leave_type=leave_type,
+                status='APPROVED',
+                from_date__year=current_year
+            ).aggregate(
+                total=models.Sum('duration_days')
+            )['total'] or 0
+            
+            current_year_usage[leave_type] = {
+                'used': used_days,
+                'available': max(0, leave_balances[leave_type] - used_days),
+                'total': leave_balances[leave_type]
+            }
+    
+    context = {
+        'leaves': page_obj,
+        'leave_balances': leave_balances,
+        'current_year_usage': current_year_usage,
+        'user_profile': user_profile,
+    }
+    
+    return render(request, 'core/my_leaves.html', context)
+
+
+@login_required
+@manager_or_above_required
+def manage_team_leaves(request):
+    """
+    View for managers/HR to manage team leave requests.
+    """
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'PENDING')
+    employee_filter = request.GET.get('employee', '')
+    leave_type_filter = request.GET.get('leave_type', '')
+    
+    # Build query
+    leave_query = Q()
+    
+    if status_filter:
+        leave_query &= Q(status=status_filter)
+    
+    if employee_filter:
+        leave_query &= Q(
+            Q(employee__first_name__icontains=employee_filter) |
+            Q(employee__last_name__icontains=employee_filter) |
+            Q(employee__username__icontains=employee_filter)
+        )
+    
+    if leave_type_filter:
+        leave_query &= Q(leave_type=leave_type_filter)
+    
+    # Get leave requests
+    leave_requests = Leave.objects.filter(
+        leave_query
+    ).select_related('employee', 'approver').order_by('-applied_on')
+    
+    # Pagination
+    paginator = Paginator(leave_requests, 15)  # 15 requests per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'leave_requests': page_obj,
+        'status_filter': status_filter,
+        'employee_filter': employee_filter,
+        'leave_type_filter': leave_type_filter,
+        'leave_types': Leave.LEAVE_TYPE_CHOICES,
+        'statuses': Leave.STATUS_CHOICES,
+    }
+    
+    return render(request, 'core/manage_team_leaves.html', context)
+
+
+@login_required
+@manager_or_above_required
+@require_POST
+def approve_leave(request, leave_id):
+    """
+    Approve a leave request.
+    """
+    leave = get_object_or_404(Leave, id=leave_id)
+    
+    if leave.status != 'PENDING':
+        messages.error(request, 'This leave request has already been processed.')
+    else:
+        leave.status = 'APPROVED'
+        leave.approver = request.user
+        leave.approved_on = timezone.now()
+        leave.save()
+        
+        messages.success(
+            request,
+            f'{leave.employee.get_full_name()}\'s {leave.get_leave_type_display().lower()} '
+            f'from {leave.from_date} to {leave.to_date} has been approved.'
+        )
+    
+    return redirect('manage_team_leaves')
+
+
+@login_required
+@manager_or_above_required
+@require_POST
+def reject_leave(request, leave_id):
+    """
+    Reject a leave request.
+    """
+    leave = get_object_or_404(Leave, id=leave_id)
+    
+    if leave.status != 'PENDING':
+        messages.error(request, 'This leave request has already been processed.')
+    else:
+        leave.status = 'REJECTED'
+        leave.approver = request.user
+        leave.approved_on = timezone.now()
+        leave.save()
+        
+        messages.warning(
+            request,
+            f'{leave.employee.get_full_name()}\'s {leave.get_leave_type_display().lower()} '
+            f'from {leave.from_date} to {leave.to_date} has been rejected.'
+        )
+    
+    return redirect('manage_team_leaves')
