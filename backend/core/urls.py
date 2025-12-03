@@ -14,6 +14,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('profile/', views.profile_view, name='profile'),
+    path('directory/', views.org_directory, name='org_directory'),
     
     # Employee management URLs
     path('employee/profile/', views.employee_profile_view, name='employee_profile'),

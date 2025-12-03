@@ -162,7 +162,7 @@ def employee_profile_edit_view(request):
 @manager_or_above_required
 def employee_directory_view(request):
     """Employee directory with search functionality."""
-    search_query = request.GET.get('search', '').strip()
+    search_query = request.GET.get('q', '').strip()  # Use 'q' parameter as specified
     department_filter = request.GET.get('department', '').strip()
     role_filter = request.GET.get('role', '').strip()
     
@@ -299,4 +299,27 @@ def admin_only_view(request):
         'title': 'Admin Only Area', 
         'message': 'This view is only accessible by Admin users.',
         'user_role': request.user.role
+    })
+
+
+@login_required
+def org_directory(request):
+    """Organization directory with search by name/department/designation."""
+    q = request.GET.get('q', '').strip()
+    
+    employees = User.objects.select_related('employeeprofile').filter(is_active=True)
+    
+    if q:
+        employees = employees.filter(
+            Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
+            Q(employeeprofile__department__icontains=q) |
+            Q(employeeprofile__designation__icontains=q)
+        )
+    
+    employees = employees.order_by('last_name', 'first_name')
+    
+    return render(request, 'core/directory.html', {
+        'employees': employees,
+        'search_query': q,
     })

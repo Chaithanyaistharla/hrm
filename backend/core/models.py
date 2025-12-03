@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
 
 
 class Role(models.TextChoices):
@@ -105,12 +106,7 @@ class EmployeeProfile(models.Model):
         ('PROBATION', 'Probation'),
     ]
     
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='employee_profile',
-        help_text="Link to user account"
-    )
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
     # Personal Information
     date_of_birth = models.DateField(
@@ -190,36 +186,20 @@ class EmployeeProfile(models.Model):
     )
     
     # Employment Information
-    designation = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Job title/designation"
-    )
-    date_of_joining = models.DateField(
-        null=True,
-        blank=True,
-        help_text="Date when employee joined the organization"
-    )
+    designation = models.CharField(max_length=128, blank=True)
+    department = models.CharField(max_length=128, blank=True)
+    dob = models.DateField(null=True, blank=True)
+    doj = models.DateField(null=True, blank=True)
     employment_status = models.CharField(
         max_length=20,
         choices=EMPLOYMENT_STATUS_CHOICES,
         default='ACTIVE',
         help_text="Current employment status"
     )
-    manager = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='managed_employees',
-        limit_choices_to={'role__name__in': ['MANAGER', 'HR', 'ADMIN']},
-        help_text="Direct manager/supervisor"
-    )
-    work_location = models.CharField(
-        max_length=200,
-        blank=True,
-        help_text="Primary work location"
-    )
+    manager = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                on_delete=models.SET_NULL, related_name='direct_reports')
+    phone = models.CharField(max_length=15, blank=True)
+    location = models.CharField(max_length=200, blank=True)
     
     # Salary and Benefits
     salary = models.DecimalField(
