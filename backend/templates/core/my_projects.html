@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Projects{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">My Projects</h1>
+                    <p class="mt-2 text-gray-600">View your current projects and team members</p>
+                    {% if total_projects > 0 %}
+                        <div class="mt-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ total_projects }} active project{{ total_projects|pluralize }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects List -->
+        {% if project_details %}
+            <div class="space-y-6">
+                {% for project_data in project_details %}
+                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                        <!-- Project Header -->
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-xl font-semibold text-gray-900">
+                                            <a href="{% url 'project_detail' project_data.project.id %}" 
+                                               class="hover:text-indigo-600">{{ project_data.project.name }}</a>
+                                        </h3>
+                                        <p class="text-sm text-gray-600">{{ project_data.project.description|default:"No description" }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4">
+                                    <!-- My Role Badge -->
+                                    {% if project_data.my_role %}
+                                        <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium 
+                                            {% if project_data.is_manager %}bg-purple-100 text-purple-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                                            {{ project_data.my_role }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <!-- Status Badge -->
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {% if project_data.project.status == 'ACTIVE' %}bg-green-100 text-green-800
+                                        {% elif project_data.project.status == 'COMPLETED' %}bg-blue-100 text-blue-800
+                                        {% elif project_data.project.status == 'ON_HOLD' %}bg-yellow-100 text-yellow-800
+                                        {% elif project_data.project.status == 'CANCELLED' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ project_data.project.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Details -->
+                        <div class="px-6 py-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Project Info -->
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-900 mb-3">Project Details</h4>
+                                    <dl class="space-y-2 text-sm">
+                                        <div>
+                                            <dt class="text-gray-500">Project Manager</dt>
+                                            <dd class="text-gray-900">
+                                                {% if project_data.project.manager %}
+                                                    {{ project_data.project.manager.get_full_name }}
+                                                {% else %}
+                                                    <span class="text-gray-500">No manager assigned</span>
+                                                {% endif %}
+                                            </dd>
+                                        </div>
+                                        {% if project_data.project.start_date %}
+                                            <div>
+                                                <dt class="text-gray-500">Start Date</dt>
+                                                <dd class="text-gray-900">{{ project_data.project.start_date|date:"M d, Y" }}</dd>
+                                            </div>
+                                        {% endif %}
+                                        {% if project_data.project.end_date %}
+                                            <div>
+                                                <dt class="text-gray-500">End Date</dt>
+                                                <dd class="text-gray-900">{{ project_data.project.end_date|date:"M d, Y" }}</dd>
+                                            </div>
+                                        {% endif %}
+                                    </dl>
+                                </div>
+
+                                <!-- Team Members -->
+                                <div class="md:col-span-2">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="text-sm font-medium text-gray-900">
+                                            Team Members ({{ project_data.team_members.count }})
+                                        </h4>
+                                        <a href="{% url 'project_detail' project_data.project.id %}" 
+                                           class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                            View Project →
+                                        </a>
+                                    </div>
+                                    
+                                    {% if project_data.team_members %}
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {% for member in project_data.team_members %}
+                                                {% if forloop.counter <= 6 %}
+                                                    <div class="flex items-center">
+                                                        <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                                            <span class="text-xs font-medium text-gray-600">
+                                                                {{ member.employee.first_name|first }}{{ member.employee.last_name|first }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <p class="text-sm font-medium text-gray-900">
+                                                                {{ member.employee.get_full_name }}
+                                                                {% if member.employee == user %}
+                                                                    <span class="text-xs text-indigo-600">(You)</span>
+                                                                {% endif %}
+                                                            </p>
+                                                            {% if member.role %}
+                                                                <p class="text-xs text-gray-500">{{ member.role }}</p>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                            
+                                            {% if project_data.team_members.count > 6 %}
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                                        <span class="text-xs font-medium text-gray-600">
+                                                            +{{ project_data.team_members.count|add:"-6" }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <p class="text-sm text-gray-500">
+                                                            {{ project_data.team_members.count|add:"-6" }} more member{{ project_data.team_members.count|add:"-6"|pluralize }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-sm text-gray-500">No team members assigned</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No projects assigned</h3>
+                    <p class="mt-1 text-sm text-gray-500">You are not currently assigned to any projects.</p>
+                    <div class="mt-6">
+                        <p class="text-sm text-gray-500">
+                            Contact your manager or HR to be assigned to projects.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

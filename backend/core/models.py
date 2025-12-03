@@ -391,15 +391,26 @@ class Leave(models.Model):
     to_date = models.DateField()
     reason = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    
+    # Approval fields
     approver = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         null=True, 
         blank=True, 
         related_name='approvals', 
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        help_text="User who approved/rejected this leave"
     )
     applied_on = models.DateTimeField(auto_now_add=True)
     approved_on = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(
+        blank=True,
+        help_text="Reason for rejection if leave was rejected"
+    )
+    
+    # System tracking
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         ordering = ['-applied_on']
@@ -467,3 +478,87 @@ class ProjectMember(models.Model):
     
     def __str__(self):
         return f"{self.project.name} - {self.employee.get_full_name()} ({self.role or 'No Role'})"
+
+
+class TimesheetEntry(models.Model):
+    """
+    Model to track daily timesheet entries for employees.
+    """
+    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateField()
+    project = models.ForeignKey(Project, null=True, blank=True, on_delete=models.SET_NULL)
+    hours = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2,
+        help_text="Hours worked (maximum 24 hours per day)"
+    )
+    description = models.TextField(
+        blank=True,
+        help_text="Brief description of work performed"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-date', '-created_at']
+        unique_together = ['employee', 'date', 'project']
+        verbose_name = 'Timesheet Entry'
+        verbose_name_plural = 'Timesheet Entries'
+    
+    def __str__(self):
+        project_name = self.project.name if self.project else 'No Project'
+        return f"{self.employee.get_full_name()} - {self.date} - {project_name} ({self.hours}h)"
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from django.db.models import Sum
+        
+        # Validate that hours don't exceed 24 per day
+        if self.hours > 24:
+            raise ValidationError("Hours cannot exceed 24 per day.")
+        
+        if self.hours <= 0:
+            raise ValidationError("Hours must be greater than 0.")
+        
+        # Check total hours for the day don't exceed 24
+        existing_entries = TimesheetEntry.objects.filter(
+            employee=self.employee,
+            date=self.date
+        ).exclude(pk=self.pk)
+        
+        total_hours = existing_entries.aggregate(
+            total=Sum('hours')
+        )['total'] or 0
+        
+        if total_hours + self.hours > 24:
+            raise ValidationError(
+                f"Total hours for {self.date} would exceed 24. "
+                f"Current total: {total_hours}h, Adding: {self.hours}h"
+            )
+    
+    @classmethod
+    def get_weekly_summary(cls, employee, start_date, end_date):
+        """
+        Get weekly summary of hours for an employee.
+        """
+        entries = cls.objects.filter(
+            employee=employee,
+            date__range=[start_date, end_date]
+        ).select_related('project')
+        
+        total_hours = entries.aggregate(total=Sum('hours'))['total'] or 0
+        
+        # Group by project
+        project_totals = {}
+        for entry in entries:
+            project_key = entry.project.name if entry.project else 'No Project'
+            if project_key not in project_totals:
+                project_totals[project_key] = {'hours': 0, 'entries': []}
+            project_totals[project_key]['hours'] += entry.hours
+            project_totals[project_key]['entries'].append(entry)
+        
+        return {
+            'total_hours': total_hours,
+            'project_totals': project_totals,
+            'entries': entries
+        }
