@@ -562,3 +562,159 @@ class TimesheetEntry(models.Model):
             'project_totals': project_totals,
             'entries': entries
         }
+
+
+class Payslip(models.Model):
+    """
+    Model to manage employee payslips and salary information.
+    """
+    employee = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE,
+        help_text="Employee for whom the payslip is generated"
+    )
+    month = models.IntegerField(
+        help_text="Month for which payslip is generated (1-12)"
+    )
+    year = models.IntegerField(
+        help_text="Year for which payslip is generated"
+    )
+    basic = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        help_text="Basic salary amount"
+    )
+    hra = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="House Rent Allowance"
+    )
+    allowances = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="Other allowances (transport, medical, etc.)"
+    )
+    deductions = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="Total deductions (tax, PF, insurance, etc.)"
+    )
+    net_pay = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        help_text="Net salary after deductions"
+    )
+    pay_date = models.DateField(
+        null=True, 
+        blank=True,
+        help_text="Date when salary was paid"
+    )
+    generated_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When the payslip was generated"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="When the payslip was last updated"
+    )
+    
+    # Additional payroll components
+    overtime_hours = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        help_text="Overtime hours worked"
+    )
+    overtime_pay = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Overtime payment"
+    )
+    bonus = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Bonus amount"
+    )
+    
+    # Tax and statutory deductions
+    income_tax = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Income tax deduction"
+    )
+    provident_fund = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Provident Fund deduction"
+    )
+    professional_tax = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Professional tax deduction"
+    )
+    
+    # Status and notes
+    STATUS_CHOICES = [
+        ('DRAFT', 'Draft'),
+        ('PROCESSED', 'Processed'),
+        ('PAID', 'Paid'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='DRAFT',
+        help_text="Payslip status"
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Additional notes or comments"
+    )
+    
+    class Meta:
+        ordering = ['-year', '-month', 'employee__first_name']
+        unique_together = ['employee', 'month', 'year']
+        verbose_name = 'Payslip'
+        verbose_name_plural = 'Payslips'
+    
+    def __str__(self):
+        from calendar import month_name
+        return f"{self.employee.get_full_name()} - {month_name[self.month]} {self.year}"
+    
+    @property
+    def gross_pay(self):
+        """Calculate gross pay (basic + allowances + overtime + bonus)."""
+        return self.basic + self.hra + self.allowances + self.overtime_pay + self.bonus
+    
+    @property
+    def total_deductions(self):
+        """Calculate total deductions."""
+        return self.deductions + self.income_tax + self.provident_fund + self.professional_tax
+    
+    def save(self, *args, **kwargs):
+        """Override save to auto-calculate net pay."""
+        # Auto-calculate net pay
+        self.net_pay = self.gross_pay - self.total_deductions
+        super().save(*args, **kwargs)
+    
+    @property
+    def month_name(self):
+        """Get month name."""
+        from calendar import month_name
+        return month_name[self.month]
+    
+    @property
+    def is_current_month(self):
+        """Check if this payslip is for current month."""
+        from datetime import date
+        today = date.today()
+        return self.year == today.year and self.month == today.month
