@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db import models
 from datetime import date
-from .models import Leave, User, Project, ProjectMember, TimesheetEntry
+from .models import Leave, User, Project, ProjectMember, TimesheetEntry, Payslip
 
 
 class LeaveApplicationForm(forms.ModelForm):
@@ -396,3 +396,155 @@ class TimesheetEntryEditForm(TimesheetEntryForm):
             # Remove max date restriction for editing existing entries
             if 'max' in self.fields['date'].widget.attrs:
                 del self.fields['date'].widget.attrs['max']
+
+
+class PayslipForm(forms.ModelForm):
+    """
+    Form for creating and editing payslips by HR.
+    """
+    
+    class Meta:
+        model = Payslip
+        fields = [
+            'employee', 'month', 'year', 'basic', 'hra', 'allowances', 
+            'overtime_hours', 'overtime_pay', 'bonus', 'deductions', 
+            'income_tax', 'provident_fund', 'professional_tax', 
+            'pay_date', 'status', 'notes'
+        ]
+        widgets = {
+            'employee': forms.Select(attrs={
+                'class': 'form-select w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500'
+            }),
+            'month': forms.Select(
+                choices=[(i, f'{i:02d}') for i in range(1, 13)],
+                attrs={
+                    'class': 'form-select w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500'
+                }
+            ),
+            'year': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'min': '2020',
+                'max': '2030'
+            }),
+            'basic': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'hra': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'allowances': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'overtime_hours': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.25',
+                'min': '0'
+            }),
+            'overtime_pay': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'bonus': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'deductions': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'income_tax': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'provident_fund': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'professional_tax': forms.NumberInput(attrs={
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'pay_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-select w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500'
+            }),
+            'notes': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-textarea w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+                'placeholder': 'Additional notes or comments...'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filter employee dropdown to show only active employees
+        self.fields['employee'].queryset = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
+        
+        # Set current month and year as default
+        from datetime import date
+        today = date.today()
+        if not self.instance.pk:
+            self.fields['month'].initial = today.month
+            self.fields['year'].initial = today.year
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        employee = cleaned_data.get('employee')
+        month = cleaned_data.get('month')
+        year = cleaned_data.get('year')
+        
+        # Check for duplicate payslip (unless editing existing)
+        if employee and month and year:
+            existing = Payslip.objects.filter(
+                employee=employee,
+                month=month,
+                year=year
+            )
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            
+            if existing.exists():
+                raise ValidationError(
+                    f"Payslip for {employee.get_full_name()} already exists for {month:02d}/{year}"
+                )
+        
+        return cleaned_data
+
+
+class PayslipBulkUploadForm(forms.Form):
+    """
+    Form for bulk uploading payslips via CSV file.
+    """
+    csv_file = forms.FileField(
+        help_text="Upload a CSV file with payslip data",
+        widget=forms.FileInput(attrs={
+            'class': 'form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
+            'accept': '.csv'
+        })
+    )
+    
+    def clean_csv_file(self):
+        file = self.cleaned_data['csv_file']
+        
+        if not file.name.endswith('.csv'):
+            raise ValidationError("Please upload a CSV file.")
+        
+        if file.size > 5 * 1024 * 1024:  # 5MB limit
+            raise ValidationError("File size must be less than 5MB.")
+        
+        return file

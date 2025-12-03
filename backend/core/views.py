@@ -14,9 +14,9 @@ from django.utils import timezone
 from datetime import date
 import json
 from .decorators import role_required, hr_required, admin_required, manager_or_hr_required, can_manage_leave
-from .models import User, EmployeeProfile, Attendance, Leave, Project, ProjectMember, TimesheetEntry
+from .models import User, EmployeeProfile, Attendance, Leave, Project, ProjectMember, TimesheetEntry, Payslip
 from .middleware import hr_or_admin_required, manager_or_above_required
-from .forms import LeaveApplicationForm, ProjectForm, ProjectMemberForm, ProjectMemberEditForm, TimesheetEntryForm, TimesheetEntryEditForm
+from .forms import LeaveApplicationForm, ProjectForm, ProjectMemberForm, ProjectMemberEditForm, TimesheetEntryForm, TimesheetEntryEditForm, PayslipForm, PayslipBulkUploadForm
 
 
 @csrf_protect
@@ -1753,3 +1753,262 @@ def timesheet_daily_entries(request, entry_date):
     }
     
     return render(request, 'core/timesheet_daily_entries.html', context)
+
+
+# ==================== PAYROLL/PAYSLIP VIEWS ====================
+
+@login_required
+@hr_required
+def payslip_list(request):
+    """HR view to list all payslips with filtering options."""
+    payslips = Payslip.objects.select_related('employee').order_by('-year', '-month', 'employee__first_name')
+    
+    # Filter by employee
+    employee_id = request.GET.get('employee')
+    if employee_id:
+        payslips = payslips.filter(employee_id=employee_id)
+    
+    # Filter by month/year
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    if month:
+        payslips = payslips.filter(month=month)
+    if year:
+        payslips = payslips.filter(year=year)
+    
+    # Filter by status
+    status = request.GET.get('status')
+    if status:
+        payslips = payslips.filter(status=status)
+    
+    # Pagination
+    paginator = Paginator(payslips, 20)
+    page_number = request.GET.get('page')
+    payslips = paginator.get_page(page_number)
+    
+    # Get filter options
+    employees = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
+    
+    context = {
+        'payslips': payslips,
+        'employees': employees,
+        'current_filters': {
+            'employee': employee_id,
+            'month': month,
+            'year': year,
+            'status': status,
+        }
+    }
+    
+    return render(request, 'core/payslip_list.html', context)
+
+
+@login_required
+@hr_required
+def payslip_create(request):
+    """HR view to create a new payslip."""
+    if request.method == 'POST':
+        form = PayslipForm(request.POST)
+        if form.is_valid():
+            payslip = form.save()
+            messages.success(request, f'Payslip created successfully for {payslip.employee.get_full_name()}.')
+            return redirect('payslip_detail', payslip_id=payslip.id)
+    else:
+        form = PayslipForm()
+    
+    context = {
+        'form': form,
+        'title': 'Create Payslip'
+    }
+    
+    return render(request, 'core/payslip_form.html', context)
+
+
+@login_required
+def payslip_detail(request, payslip_id):
+    """View payslip details - accessible by HR and the employee."""
+    payslip = get_object_or_404(Payslip, id=payslip_id)
+    
+    # Permission check: HR can view all, employees can only view their own
+    if not (request.user.is_hr() or request.user.is_admin_role() or payslip.employee == request.user):
+        messages.error(request, 'You do not have permission to view this payslip.')
+        return redirect('dashboard')
+    
+    context = {
+        'payslip': payslip,
+        'can_edit': request.user.is_hr() or request.user.is_admin_role(),
+    }
+    
+    return render(request, 'core/payslip_detail.html', context)
+
+
+@login_required
+@hr_required
+def payslip_edit(request, payslip_id):
+    """HR view to edit an existing payslip."""
+    payslip = get_object_or_404(Payslip, id=payslip_id)
+    
+    if request.method == 'POST':
+        form = PayslipForm(request.POST, instance=payslip)
+        if form.is_valid():
+            payslip = form.save()
+            messages.success(request, f'Payslip updated successfully for {payslip.employee.get_full_name()}.')
+            return redirect('payslip_detail', payslip_id=payslip.id)
+    else:
+        form = PayslipForm(instance=payslip)
+    
+    context = {
+        'form': form,
+        'payslip': payslip,
+        'title': f'Edit Payslip - {payslip.employee.get_full_name()}'
+    }
+    
+    return render(request, 'core/payslip_form.html', context)
+
+
+@login_required
+@hr_required
+def payslip_delete(request, payslip_id):
+    """HR view to delete a payslip."""
+    payslip = get_object_or_404(Payslip, id=payslip_id)
+    
+    if request.method == 'POST':
+        employee_name = payslip.employee.get_full_name()
+        payslip.delete()
+        messages.success(request, f'Payslip deleted successfully for {employee_name}.')
+        return redirect('payslip_list')
+    
+    context = {
+        'payslip': payslip,
+    }
+    
+    return render(request, 'core/payslip_delete_confirm.html', context)
+
+
+@login_required
+def my_payslips(request):
+    """Employee view to see their own payslips."""
+    payslips = Payslip.objects.filter(employee=request.user).order_by('-year', '-month')
+    
+    # Pagination
+    paginator = Paginator(payslips, 12)  # 12 payslips per page (1 year)
+    page_number = request.GET.get('page')
+    payslips = paginator.get_page(page_number)
+    
+    context = {
+        'payslips': payslips,
+    }
+    
+    return render(request, 'core/my_payslips.html', context)
+
+
+@login_required
+@hr_required
+def payslip_bulk_upload(request):
+    """HR view to bulk upload payslips via CSV."""
+    if request.method == 'POST':
+        form = PayslipBulkUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
+            
+            try:
+                import csv
+                import io
+                from django.db import transaction
+                
+                # Read CSV file
+                file_data = csv_file.read().decode('utf-8')
+                reader = csv.DictReader(io.StringIO(file_data))
+                
+                created_count = 0
+                errors = []
+                
+                with transaction.atomic():
+                    for row_num, row in enumerate(reader, start=1):
+                        try:
+                            # Get employee by username or email
+                            employee_identifier = row.get('employee_username') or row.get('employee_email')
+                            if not employee_identifier:
+                                errors.append(f"Row {row_num}: Missing employee identifier")
+                                continue
+                            
+                            try:
+                                if '@' in employee_identifier:
+                                    employee = User.objects.get(email=employee_identifier, is_active=True)
+                                else:
+                                    employee = User.objects.get(username=employee_identifier, is_active=True)
+                            except User.DoesNotExist:
+                                errors.append(f"Row {row_num}: Employee not found: {employee_identifier}")
+                                continue
+                            
+                            # Create payslip
+                            payslip_data = {
+                                'employee': employee,
+                                'month': int(row.get('month', 0)),
+                                'year': int(row.get('year', 0)),
+                                'basic': float(row.get('basic', 0)),
+                                'hra': float(row.get('hra', 0)),
+                                'allowances': float(row.get('allowances', 0)),
+                                'overtime_hours': float(row.get('overtime_hours', 0)),
+                                'overtime_pay': float(row.get('overtime_pay', 0)),
+                                'bonus': float(row.get('bonus', 0)),
+                                'deductions': float(row.get('deductions', 0)),
+                                'income_tax': float(row.get('income_tax', 0)),
+                                'provident_fund': float(row.get('provident_fund', 0)),
+                                'professional_tax': float(row.get('professional_tax', 0)),
+                                'status': row.get('status', 'DRAFT'),
+                                'notes': row.get('notes', ''),
+                            }
+                            
+                            # Handle pay_date
+                            pay_date_str = row.get('pay_date')
+                            if pay_date_str:
+                                from datetime import datetime
+                                payslip_data['pay_date'] = datetime.strptime(pay_date_str, '%Y-%m-%d').date()
+                            
+                            # Check for existing payslip
+                            existing = Payslip.objects.filter(
+                                employee=employee,
+                                month=payslip_data['month'],
+                                year=payslip_data['year']
+                            ).first()
+                            
+                            if existing:
+                                errors.append(f"Row {row_num}: Payslip already exists for {employee.get_full_name()}")
+                                continue
+                            
+                            # Create payslip
+                            Payslip.objects.create(**payslip_data)
+                            created_count += 1
+                            
+                        except (ValueError, KeyError) as e:
+                            errors.append(f"Row {row_num}: Invalid data - {str(e)}")
+                            continue
+                
+                if created_count > 0:
+                    messages.success(request, f'Successfully created {created_count} payslips.')
+                
+                if errors:
+                    error_message = f'Errors encountered:\\n' + '\\n'.join(errors[:10])  # Show first 10 errors
+                    if len(errors) > 10:
+                        error_message += f'\\n... and {len(errors) - 10} more errors.'
+                    messages.warning(request, error_message)
+                
+                if created_count > 0:
+                    return redirect('payslip_list')
+                    
+            except Exception as e:
+                messages.error(request, f'Error processing CSV file: {str(e)}')
+    else:
+        form = PayslipBulkUploadForm()
+    
+    context = {
+        'form': form,
+        'csv_template_headers': [
+            'employee_username', 'employee_email', 'month', 'year', 'basic', 'hra', 
+            'allowances', 'overtime_hours', 'overtime_pay', 'bonus', 'deductions', 
+            'income_tax', 'provident_fund', 'professional_tax', 'pay_date', 'status', 'notes'
+        ]
+    }
+    
+    return render(request, 'core/payslip_bulk_upload.html', context)

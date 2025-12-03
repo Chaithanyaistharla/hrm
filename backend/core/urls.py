@@ -65,5 +65,14 @@ urlpatterns = [
     path('timesheets/edit/<int:entry_id>/', views.timesheet_edit_entry, name='timesheet_edit_entry'),
     path('timesheets/delete/<int:entry_id>/', views.timesheet_delete_entry, name='timesheet_delete_entry'),
     
+    # Payroll Management
+    path('payslips/', views.payslip_list, name='payslip_list'),
+    path('payslips/create/', views.payslip_create, name='payslip_create'),
+    path('payslips/<int:payslip_id>/', views.payslip_detail, name='payslip_detail'),
+    path('payslips/<int:payslip_id>/edit/', views.payslip_edit, name='payslip_edit'),
+    path('payslips/<int:payslip_id>/delete/', views.payslip_delete, name='payslip_delete'),
+    path('payslips/bulk-upload/', views.payslip_bulk_upload, name='payslip_bulk_upload'),
+    path('my-payslips/', views.my_payslips, name='my_payslips'),
+    
     path('', home_redirect, name='home'),
 ]
