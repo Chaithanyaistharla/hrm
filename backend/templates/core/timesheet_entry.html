@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Timesheet Entry{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-4">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Daily Timesheet Entry</h1>
+                    <p class="mt-2 text-gray-600">Record your daily work hours and activities</p>
+                    {% if today_total > 0 %}
+                        <div class="mt-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                {% if today_total > 8 %}bg-orange-100 text-orange-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                                Today's Total: {{ today_total }} hour{{ today_total|pluralize }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'timesheet_weekly_summary' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Weekly Summary
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Entry Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">New Timesheet Entry</h3>
+                    </div>
+                    
+                    <form method="POST" class="px-6 py-5 space-y-6">
+                        {% csrf_token %}
+                        
+                        <!-- Date and Hours Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Date -->
+                            <div>
+                                <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Date *
+                                </label>
+                                {{ form.date }}
+                                {% if form.date.errors %}
+                                    <div class="mt-2 text-sm text-red-600">
+                                        {{ form.date.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Hours -->
+                            <div>
+                                <label for="{{ form.hours.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Hours Worked *
+                                </label>
+                                {{ form.hours }}
+                                {% if form.hours.errors %}
+                                    <div class="mt-2 text-sm text-red-600">
+                                        {{ form.hours.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <p class="mt-1 text-sm text-gray-500">Enter hours in decimal format (e.g., 8.5 for 8 hours 30 minutes)</p>
+                            </div>
+                        </div>
+
+                        <!-- Project -->
+                        <div>
+                            <label for="{{ form.project.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Project
+                            </label>
+                            {{ form.project }}
+                            {% if form.project.errors %}
+                                <div class="mt-2 text-sm text-red-600">
+                                    {{ form.project.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">Select the project you worked on (optional)</p>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Work Description
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="mt-2 text-sm text-red-600">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">Brief description of work performed</p>
+                        </div>
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="ml-3">
+                                        {% for error in form.non_field_errors %}
+                                            <p class="text-sm text-red-700">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Submit Button -->
+                        <div class="flex justify-end pt-6 border-t border-gray-200">
+                            <button type="submit" 
+                                    class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Submit Entry
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Entries Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Recent Entries</h3>
+                    </div>
+                    
+                    <div class="px-6 py-5">
+                        {% if recent_entries %}
+                            <div class="space-y-4">
+                                {% for entry in recent_entries %}
+                                    <div class="flex items-center justify-between py-2 {% if not forloop.last %}border-b border-gray-200{% endif %}">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                                {{ entry.date|date:"M d, Y" }}
+                                            </p>
+                                            <div class="flex items-center text-sm text-gray-500 space-x-2">
+                                                <span class="font-medium">{{ entry.hours }}h</span>
+                                                {% if entry.project %}
+                                                    <span>•</span>
+                                                    <span class="truncate">{{ entry.project.name }}</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if entry.description %}
+                                                <p class="text-xs text-gray-400 mt-1 truncate">{{ entry.description|truncatechars:50 }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex space-x-1">
+                                            <a href="{% url 'timesheet_edit_entry' entry.id %}" 
+                                               class="text-indigo-600 hover:text-indigo-900 text-xs" title="Edit">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <a href="{% url 'timesheet_weekly_summary' %}" 
+                                   class="text-sm text-indigo-600 hover:text-indigo-900 font-medium">
+                                    View All Entries →
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-6">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">No entries yet</h3>
+                                <p class="mt-1 text-sm text-gray-500">Start tracking your time by submitting your first entry.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Tips -->
+                <div class="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
+                    <div class="flex">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Tips for Time Tracking</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Maximum 24 hours per day allowed</li>
+                                    <li>Use decimal format: 1.5 = 1 hour 30 minutes</li>
+                                    <li>Select a project to categorize your work</li>
+                                    <li>Add descriptions to remember what you worked on</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

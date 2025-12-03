@@ -49,6 +49,40 @@ hr_required = role_required(Role.HR, Role.ADMIN)
 manager_required = role_required(Role.MANAGER, Role.HR, Role.ADMIN)
 
 
+def manager_or_hr_required(view_func):
+    """
+    Decorator to require manager, HR, or admin role for leave approval functionality.
+    """
+    @wraps(view_func)
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        user = request.user
+        if user.is_hr() or user.is_manager() or user.is_admin_role():
+            return view_func(request, *args, **kwargs)
+        messages.error(request, 'Access denied. You must be a Manager, HR, or Admin to access this resource.')
+        return HttpResponseForbidden("You don't have permission to access this resource.")
+    return wrapper
+
+
+def can_manage_leave(user, leave):
+    """
+    Check if a user can manage (approve/reject) a specific leave.
+    """
+    # HR and Admin can manage all leaves
+    if user.is_hr() or user.is_admin_role():
+        return True
+    
+    # Managers can only manage their direct reports' leaves
+    if user.is_manager():
+        try:
+            employee_profile = leave.employee.employeeprofile
+            return employee_profile.manager == user
+        except:
+            return False
+    
+    return False
+
+
 class AdminRequiredMixin(RoleRequiredMixin):
     required_roles = [Role.ADMIN]
 

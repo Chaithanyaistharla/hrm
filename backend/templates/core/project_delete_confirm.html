@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Project - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-4">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'project_detail' project.id %}" 
+                   class="text-gray-400 hover:text-gray-600" title="Back to Project">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Delete Project</h1>
+                    <p class="mt-1 text-gray-600">Permanently remove this project</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning Card -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-5">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-red-900">Confirm Project Deletion</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p>Are you sure you want to delete <strong>{{ project.name }}</strong>?</p>
+                            <p class="mt-2">This action will:</p>
+                            <ul class="list-disc ml-5 mt-1 space-y-1">
+                                <li>Permanently delete the project and all its data</li>
+                                <li>Remove all {{ member_count }} team member{{ member_count|pluralize }} from the project</li>
+                                <li>This action cannot be undone</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'project_detail' project.id %}" 
+                       class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    <form method="POST" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                            Delete Project
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
