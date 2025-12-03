@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Organization Directory - HRMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-users"></i> Organization Directory</h2>
+            </div>
+
+            <!-- Search Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    name="q" 
+                                    placeholder="Search by name, department, or designation..." 
+                                    value="{{ search_query }}"
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <a href="{% url 'org_directory' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Employees 
+                        <span class="badge bg-primary">{{ employees.count }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if employees %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Manager</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for employee in employees %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar me-3">
+                                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                                         style="width: 40px; height: 40px;">
+                                                        <span class="text-white fw-bold">
+                                                            {{ employee.first_name|first|upper }}{{ employee.last_name|first|upper }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold">{{ employee.get_full_name|default:employee.username }}</div>
+                                                    <small class="text-muted">{{ employee.username }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if employee.employeeprofile.department %}
+                                                <span class="badge bg-info">{{ employee.employeeprofile.department }}</span>
+                                            {% else %}
+                                                <span class="text-muted">Not specified</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ employee.employeeprofile.designation|default:"-" }}</td>
+                                        <td>
+                                            <a href="mailto:{{ employee.email }}" class="text-decoration-none">
+                                                {{ employee.email }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if employee.employeeprofile.phone %}
+                                                <a href="tel:{{ employee.employeeprofile.phone }}" class="text-decoration-none">
+                                                    {{ employee.employeeprofile.phone }}
+                                                </a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if employee.employeeprofile.manager %}
+                                                {{ employee.employeeprofile.manager.get_full_name|default:employee.employeeprofile.manager.username }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No employees found</h5>
+                            {% if search_query %}
+                                <p class="text-muted">No results for "{{ search_query }}"</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

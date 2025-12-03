@@ -26,7 +26,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-fp044p_5j7&h4bn#xc^qp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0,testserver,backend').split(',')
 
 # Custom User Model
 AUTH_USER_MODEL = 'core.User'
@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.RoleRequiredMiddleware',
     'core.middleware.RoleBasedAccessMiddleware',
 ]
 
@@ -126,6 +127,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Additional locations of static files for development
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 # Media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -139,3 +145,11 @@ LOGOUT_REDIRECT_URL = '/login/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CSRF settings for development
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost',
+    'http://127.0.0.1',
+]

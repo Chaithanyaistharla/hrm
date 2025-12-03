@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Attendance Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .attendance-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .time-display {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .status-clocked-in {
+        background-color: #10b981;
+        color: white;
+    }
+    
+    .status-completed {
+        background-color: #6b7280;
+        color: white;
+    }
+    
+    .status-not-clocked-in {
+        background-color: #f59e0b;
+        color: white;
+    }
+    
+    .weekly-summary {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+    }
+    
+    .day-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .day-row:last-child {
+        border-bottom: none;
+    }
+    
+    .day-date {
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    .hours-display {
+        font-weight: 600;
+        color: #10b981;
+    }
+    
+    .no-hours {
+        color: #9ca3af;
+    }
+    
+    .total-hours {
+        background-color: #f3f4f6;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .btn-attendance {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-attendance:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">My Attendance</h1>
+            <p class="text-gray-600 mt-2">Today: {{ today|date:"l, F d, Y" }}</p>
+        </div>
+        <div class="quick-actions">
+            <a href="{% url 'attendance_page' %}" class="btn-attendance">
+                Clock In/Out
+            </a>
+        </div>
+    </div>
+    
+    <!-- Today's Attendance Card -->
+    <div class="attendance-card">
+        <div class="flex justify-between items-start">
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Today's Attendance</h2>
+                
+                {% if today_attendance %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <p class="text-sm opacity-75">Clock In Time</p>
+                            {% if today_attendance.login_time %}
+                                <p class="time-display">{{ today_attendance.login_time|time:"g:i A" }}</p>
+                            {% else %}
+                                <p class="time-display">Not clocked in</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-75">Clock Out Time</p>
+                            {% if today_attendance.logout_time %}
+                                <p class="time-display">{{ today_attendance.logout_time|time:"g:i A" }}</p>
+                            {% else %}
+                                <p class="time-display">{% if today_attendance.login_time %}Still working{% else %}---{% endif %}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-75">Hours Worked</p>
+                            {% if today_attendance.working_hours %}
+                                <p class="time-display">{{ today_attendance.working_hours }} hrs</p>
+                            {% elif today_attendance.current_working_hours %}
+                                <p class="time-display">{{ today_attendance.current_working_hours }} hrs</p>
+                                <p class="text-xs opacity-75">(Current)</p>
+                            {% else %}
+                                <p class="time-display">0 hrs</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="status-badge status-{{ today_attendance.status|lower|cut:' '|cut:"'" }}">
+                            {{ today_attendance.status }}
+                        </span>
+                        {% if today_attendance.ip %}
+                            <p class="text-xs opacity-75">From: {{ today_attendance.ip }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-lg mb-2">No attendance record for today</p>
+                        <span class="status-badge status-not-clocked-in">Not Clocked In</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Weekly Summary -->
+    <div class="weekly-summary">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Weekly Summary (Last 7 Days)</h2>
+        
+        {% if weekly_attendance %}
+            {% for record in weekly_attendance %}
+                <div class="day-row">
+                    <div>
+                        <span class="day-date">{{ record.date|date:"l, M d" }}</span>
+                        {% if record.date == today %}
+                            <span class="inline-block ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">Today</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        {% if record.login_time %}
+                            <span class="text-sm text-gray-600">
+                                {{ record.login_time|time:"g:i A" }}
+                                {% if record.logout_time %}
+                                    - {{ record.logout_time|time:"g:i A" }}
+                                {% else %}
+                                    - Working
+                                {% endif %}
+                            </span>
+                        {% endif %}
+                        
+                        {% if record.working_hours %}
+                            <span class="hours-display">{{ record.working_hours }} hrs</span>
+                        {% elif record.current_working_hours %}
+                            <span class="hours-display">{{ record.current_working_hours }} hrs</span>
+                        {% else %}
+                            <span class="no-hours">No hours</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <div class="total-hours">
+                <span class="font-semibold text-gray-900">Total Hours This Week:</span>
+                <span class="text-xl font-bold text-green-600">{{ total_weekly_hours }} hrs</span>
+            </div>
+        {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <p>No attendance records found for the past week.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

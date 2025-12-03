@@ -1,0 +1,577 @@
+[
+  {
+    "model": "core.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$8zqKsOqhX7T1$K7J4rY6TfKdX2QjLVsZ9HmWoP+0nQbEkFvN3mI8Y5cM=",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "System",
+      "last_name": "Administrator",
+      "email": "admin@hrms.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2024-12-01T10:00:00Z",
+      "role": "ADMIN",
+      "employee_id": "EMP001",
+      "phone_number": "+1-555-0001",
+      "department": "IT",
+      "hire_date": "2024-01-01",
+      "created_at": "2024-12-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core.user", 
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$8zqKsOqhX7T1$K7J4rY6TfKdX2QjLVsZ9HmWoP+0nQbEkFvN3mI8Y5cM=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "hr.manager",
+      "first_name": "Sarah",
+      "last_name": "Johnson", 
+      "email": "sarah.johnson@hrms.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-12-01T10:00:00Z",
+      "role": "HR",
+      "employee_id": "EMP002",
+      "phone_number": "+1-555-0002",
+      "department": "Human Resources",
+      "hire_date": "2024-02-01",
+      "created_at": "2024-12-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$8zqKsOqhX7T1$K7J4rY6TfKdX2QjLVsZ9HmWoP+0nQbEkFvN3mI8Y5cM=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "dev.manager",
+      "first_name": "Michael",
+      "last_name": "Chen",
+      "email": "michael.chen@hrms.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-12-01T10:00:00Z",
+      "role": "MANAGER",
+      "employee_id": "EMP003",
+      "phone_number": "+1-555-0003",
+      "department": "Engineering",
+      "hire_date": "2024-03-01",
+      "created_at": "2024-12-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$8zqKsOqhX7T1$K7J4rY6TfKdX2QjLVsZ9HmWoP+0nQbEkFvN3mI8Y5cM=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "alice.developer",
+      "first_name": "Alice",
+      "last_name": "Williams",
+      "email": "alice.williams@hrms.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-12-01T10:00:00Z",
+      "role": "EMPLOYEE",
+      "employee_id": "EMP004",
+      "phone_number": "+1-555-0004",
+      "department": "Engineering",
+      "hire_date": "2024-04-15",
+      "created_at": "2024-12-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$8zqKsOqhX7T1$K7J4rY6TfKdX2QjLVsZ9HmWoP+0nQbEkFvN3mI8Y5cM=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "bob.designer",
+      "first_name": "Bob",
+      "last_name": "Martinez",
+      "email": "bob.martinez@hrms.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-12-01T10:00:00Z",
+      "role": "EMPLOYEE",
+      "employee_id": "EMP005",
+      "phone_number": "+1-555-0005",
+      "department": "Design",
+      "hire_date": "2024-05-01",
+      "created_at": "2024-12-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core.user",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$8zqKsOqhX7T1$K7J4rY6TfKdX2QjLVsZ9HmWoP+0nQbEkFvN3mI8Y5cM=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "emma.analyst",
+      "first_name": "Emma",
+      "last_name": "Davis",
+      "email": "emma.davis@hrms.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-12-01T10:00:00Z",
+      "role": "EMPLOYEE",
+      "employee_id": "EMP006",
+      "phone_number": "+1-555-0006",
+      "department": "Analytics",
+      "hire_date": "2024-06-01",
+      "created_at": "2024-12-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "core.employeeprofile",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "date_of_birth": "1985-03-15",
+      "gender": "M",
+      "marital_status": "M",
+      "nationality": "American",
+      "personal_email": "admin.personal@gmail.com",
+      "emergency_contact_name": "Jane Administrator",
+      "emergency_contact_phone": "+1-555-9001",
+      "emergency_contact_relationship": "Spouse",
+      "address_line_1": "123 Admin Street",
+      "address_line_2": "Suite 100",
+      "city": "San Francisco",
+      "state": "California",
+      "postal_code": "94105",
+      "country": "United States",
+      "designation": "System Administrator",
+      "department": "IT",
+      "dob": "1985-03-15",
+      "doj": "2024-01-01",
+      "employment_status": "ACTIVE",
+      "manager": null,
+      "phone": "+1-555-0001",
+      "location": "San Francisco, CA",
+      "salary": "120000.00",
+      "salary_currency": "USD",
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.employeeprofile",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "date_of_birth": "1990-07-22",
+      "gender": "F",
+      "marital_status": "S",
+      "nationality": "American",
+      "personal_email": "sarah.j.personal@gmail.com",
+      "emergency_contact_name": "Robert Johnson",
+      "emergency_contact_phone": "+1-555-9002",
+      "emergency_contact_relationship": "Father",
+      "address_line_1": "456 HR Avenue",
+      "address_line_2": "",
+      "city": "San Francisco",
+      "state": "California",
+      "postal_code": "94107",
+      "country": "United States",
+      "designation": "HR Manager",
+      "department": "Human Resources",
+      "dob": "1990-07-22",
+      "doj": "2024-02-01",
+      "employment_status": "ACTIVE",
+      "manager": 1,
+      "phone": "+1-555-0002",
+      "location": "San Francisco, CA",
+      "salary": "95000.00",
+      "salary_currency": "USD",
+      "is_active": true,
+      "created_at": "2024-02-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.employeeprofile",
+    "pk": 3,
+    "fields": {
+      "user": 3,
+      "date_of_birth": "1988-11-10",
+      "gender": "M",
+      "marital_status": "M",
+      "nationality": "Chinese-American",
+      "personal_email": "michael.chen.personal@gmail.com",
+      "emergency_contact_name": "Lisa Chen",
+      "emergency_contact_phone": "+1-555-9003",
+      "emergency_contact_relationship": "Spouse",
+      "address_line_1": "789 Engineering Blvd",
+      "address_line_2": "Apt 2B",
+      "city": "San Francisco",
+      "state": "California",
+      "postal_code": "94110",
+      "country": "United States",
+      "designation": "Engineering Manager",
+      "department": "Engineering",
+      "dob": "1988-11-10",
+      "doj": "2024-03-01",
+      "employment_status": "ACTIVE",
+      "manager": 1,
+      "phone": "+1-555-0003",
+      "location": "San Francisco, CA",
+      "salary": "110000.00",
+      "salary_currency": "USD",
+      "is_active": true,
+      "created_at": "2024-03-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.employeeprofile",
+    "pk": 4,
+    "fields": {
+      "user": 4,
+      "date_of_birth": "1995-01-08",
+      "gender": "F",
+      "marital_status": "S",
+      "nationality": "American",
+      "personal_email": "alice.w.personal@gmail.com",
+      "emergency_contact_name": "John Williams",
+      "emergency_contact_phone": "+1-555-9004",
+      "emergency_contact_relationship": "Father",
+      "address_line_1": "321 Developer Lane",
+      "address_line_2": "",
+      "city": "San Francisco",
+      "state": "California",
+      "postal_code": "94103",
+      "country": "United States",
+      "designation": "Senior Software Developer",
+      "department": "Engineering",
+      "dob": "1995-01-08",
+      "doj": "2024-04-15",
+      "employment_status": "ACTIVE",
+      "manager": 3,
+      "phone": "+1-555-0004",
+      "location": "San Francisco, CA",
+      "salary": "85000.00",
+      "salary_currency": "USD",
+      "is_active": true,
+      "created_at": "2024-04-15T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.employeeprofile",
+    "pk": 5,
+    "fields": {
+      "user": 5,
+      "date_of_birth": "1992-09-14",
+      "gender": "M",
+      "marital_status": "S",
+      "nationality": "Hispanic-American",
+      "personal_email": "bob.m.personal@gmail.com",
+      "emergency_contact_name": "Maria Martinez",
+      "emergency_contact_phone": "+1-555-9005",
+      "emergency_contact_relationship": "Mother",
+      "address_line_1": "654 Design Street",
+      "address_line_2": "Unit 15",
+      "city": "San Francisco",
+      "state": "California",
+      "postal_code": "94108",
+      "country": "United States",
+      "designation": "UI/UX Designer",
+      "department": "Design",
+      "dob": "1992-09-14",
+      "doj": "2024-05-01",
+      "employment_status": "ACTIVE",
+      "manager": 3,
+      "phone": "+1-555-0005",
+      "location": "San Francisco, CA",
+      "salary": "75000.00",
+      "salary_currency": "USD",
+      "is_active": true,
+      "created_at": "2024-05-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.employeeprofile",
+    "pk": 6,
+    "fields": {
+      "user": 6,
+      "date_of_birth": "1993-12-03",
+      "gender": "F",
+      "marital_status": "S",
+      "nationality": "American",
+      "personal_email": "emma.d.personal@gmail.com",
+      "emergency_contact_name": "David Davis",
+      "emergency_contact_phone": "+1-555-9006",
+      "emergency_contact_relationship": "Brother",
+      "address_line_1": "987 Analytics Ave",
+      "address_line_2": "",
+      "city": "San Francisco",
+      "state": "California",
+      "postal_code": "94109",
+      "country": "United States",
+      "designation": "Data Analyst",
+      "department": "Analytics",
+      "dob": "1993-12-03",
+      "doj": "2024-06-01",
+      "employment_status": "ACTIVE",
+      "manager": 3,
+      "phone": "+1-555-0006",
+      "location": "San Francisco, CA",
+      "salary": "70000.00",
+      "salary_currency": "USD",
+      "is_active": true,
+      "created_at": "2024-06-01T10:00:00Z",
+      "updated_at": "2024-12-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.project",
+    "pk": 1,
+    "fields": {
+      "name": "HRMS Development",
+      "description": "Development of the Human Resource Management System with Django and modern web technologies. This project includes employee management, attendance tracking, leave management, and project management features.",
+      "manager": 3,
+      "start_date": "2024-01-15",
+      "end_date": "2024-12-31",
+      "status": "ACTIVE",
+      "created_at": "2024-01-15T09:00:00Z",
+      "updated_at": "2024-12-03T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.project",
+    "pk": 2,
+    "fields": {
+      "name": "Employee Portal Redesign",
+      "description": "Complete redesign of the employee self-service portal with improved user experience, mobile responsiveness, and modern UI components using Tailwind CSS.",
+      "manager": 3,
+      "start_date": "2024-09-01",
+      "end_date": "2025-02-28",
+      "status": "ACTIVE",
+      "created_at": "2024-09-01T10:00:00Z",
+      "updated_at": "2024-12-03T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.project",
+    "pk": 3,
+    "fields": {
+      "name": "Data Analytics Dashboard",
+      "description": "Development of comprehensive analytics dashboard for HR metrics, employee performance tracking, and organizational insights with interactive visualizations.",
+      "manager": 3,
+      "start_date": "2024-10-01",
+      "end_date": "2025-03-31",
+      "status": "ACTIVE",
+      "created_at": "2024-10-01T11:00:00Z",
+      "updated_at": "2024-12-03T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.project",
+    "pk": 4,
+    "fields": {
+      "name": "Legacy System Migration",
+      "description": "Migration of legacy HR data and systems to the new HRMS platform. Includes data cleaning, validation, and integration testing.",
+      "manager": 1,
+      "start_date": "2024-07-01",
+      "end_date": "2024-11-30",
+      "status": "COMPLETED",
+      "created_at": "2024-07-01T08:00:00Z",
+      "updated_at": "2024-11-30T17:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "employee": 3,
+      "role": "Project Manager",
+      "joined_on": "2024-01-15T09:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 2,
+    "fields": {
+      "project": 1,
+      "employee": 4,
+      "role": "Lead Developer",
+      "joined_on": "2024-01-20T09:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 3,
+    "fields": {
+      "project": 1,
+      "employee": 5,
+      "role": "UI/UX Designer",
+      "joined_on": "2024-02-01T09:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 4,
+    "fields": {
+      "project": 2,
+      "employee": 5,
+      "role": "Lead Designer", 
+      "joined_on": "2024-09-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 5,
+    "fields": {
+      "project": 2,
+      "employee": 4,
+      "role": "Frontend Developer",
+      "joined_on": "2024-09-05T10:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 6,
+    "fields": {
+      "project": 3,
+      "employee": 6,
+      "role": "Data Analyst",
+      "joined_on": "2024-10-01T11:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 7,
+    "fields": {
+      "project": 3,
+      "employee": 4,
+      "role": "Backend Developer",
+      "joined_on": "2024-10-05T11:00:00Z"
+    }
+  },
+  {
+    "model": "core.projectmember",
+    "pk": 8,
+    "fields": {
+      "project": 4,
+      "employee": 1,
+      "role": "Technical Lead",
+      "joined_on": "2024-07-01T08:00:00Z"
+    }
+  },
+  {
+    "model": "core.attendance",
+    "pk": 1,
+    "fields": {
+      "employee": 4,
+      "date": "2024-12-03",
+      "login_time": "2024-12-03T09:15:00Z",
+      "logout_time": null,
+      "ip": "192.168.1.100",
+      "device_info": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      "location": "San Francisco Office - Floor 3",
+      "risk_score": 0.1
+    }
+  },
+  {
+    "model": "core.attendance",
+    "pk": 2,
+    "fields": {
+      "employee": 5,
+      "date": "2024-12-03",
+      "login_time": "2024-12-03T08:45:00Z",
+      "logout_time": null,
+      "ip": "192.168.1.101", 
+      "device_info": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "location": "San Francisco Office - Floor 2",
+      "risk_score": 0.0
+    }
+  },
+  {
+    "model": "core.attendance",
+    "pk": 3,
+    "fields": {
+      "employee": 6,
+      "date": "2024-12-03",
+      "login_time": "2024-12-03T09:00:00Z",
+      "logout_time": null,
+      "ip": "192.168.1.102",
+      "device_info": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+      "location": "San Francisco Office - Floor 4",
+      "risk_score": 0.0
+    }
+  },
+  {
+    "model": "core.leave",
+    "pk": 1,
+    "fields": {
+      "employee": 4,
+      "leave_type": "ANNUAL",
+      "from_date": "2024-12-25",
+      "to_date": "2024-12-26",
+      "reason": "Christmas holidays with family",
+      "status": "APPROVED",
+      "approver": 3,
+      "applied_on": "2024-12-01T10:00:00Z",
+      "approved_on": "2024-12-02T14:30:00Z"
+    }
+  },
+  {
+    "model": "core.leave",
+    "pk": 2,
+    "fields": {
+      "employee": 5,
+      "leave_type": "ANNUAL",
+      "from_date": "2024-12-23",
+      "to_date": "2024-12-27",
+      "reason": "Year-end vacation",
+      "status": "PENDING",
+      "approver": null,
+      "applied_on": "2024-12-02T11:00:00Z",
+      "approved_on": null
+    }
+  },
+  {
+    "model": "core.leave",
+    "pk": 3,
+    "fields": {
+      "employee": 6,
+      "leave_type": "SICK",
+      "from_date": "2024-11-28",
+      "to_date": "2024-11-29",
+      "reason": "Flu symptoms and recovery",
+      "status": "APPROVED",
+      "approver": 3,
+      "applied_on": "2024-11-27T16:00:00Z",
+      "approved_on": "2024-11-28T09:00:00Z"
+    }
+  }
+]
