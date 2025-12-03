@@ -3,21 +3,21 @@
 {% block title %}HR Dashboard - HRMS{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container mx-auto px-4 py-8 max-w-7xl">
     <!-- Welcome Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0">
-                        <i class="fas fa-users-cog text-primary me-2"></i>
-                        HR Management Dashboard
-                    </h1>
-                    <p class="text-muted mb-0">Welcome back, {{ user.get_full_name|default:user.username }} | {{ role_display }}</p>
-                </div>
-                <div class="text-end">
-                    <span class="badge bg-danger fs-6">{{ role_display }}</span>
-                </div>
+    <div class="mb-8 animate-fade-in-up">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center mr-3">
+                        <i class="fas fa-users-cog text-white"></i>
+                    </div>
+                    HR Management Dashboard
+                </h1>
+                <p class="text-gray-600 text-lg">Welcome back, {{ user.get_full_name|default:user.username }} | {{ role_display }}</p>
+            </div>
+            <div class="text-right">
+                <span class="badge-enhanced bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 text-sm">{{ role_display }}</span>
             </div>
         </div>
     </div>

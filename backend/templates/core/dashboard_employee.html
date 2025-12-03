@@ -3,26 +3,34 @@
 {% block title %}Employee Dashboard - HRMS{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container mx-auto px-4 py-8 max-w-7xl">
     <!-- Welcome Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0">
-                        <i class="fas fa-tachometer-alt text-primary me-2"></i>
-                        Welcome back, {{ user.get_full_name|default:user.username }}!
-                    </h1>
-                    <p class="text-muted mb-0">{{ role_display }} Dashboard</p>
-                </div>
-                <div class="text-end">
-                    <span class="badge bg-primary fs-6">{{ role_display }}</span>
-                </div>
+    <div class="mb-8 animate-fade-in-up">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-3">
+                        <i class="fas fa-tachometer-alt text-white"></i>
+                    </div>
+                    Welcome back, {{ user.get_full_name|default:user.username }}!
+                </h1>
+                <p class="text-gray-600 text-lg">{{ role_display }} Dashboard</p>
+            </div>
+            <div class="text-right">
+                <span class="badge-enhanced bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 text-sm">{{ role_display }}</span>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions Row -->
+feat/ui/tailwind-fixtures
+    <div class="mb-8">
+        <div class="card-enhanced animate-slide-in-up" style="animation-delay: 0.1s;">
+            <div class="p-6">
+                <h5 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <div class="w-8 h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-bolt text-white"></i>
+=======
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
@@ -51,15 +59,49 @@
                                 <i class="fas fa-user-edit"></i> Update Profile
                             </a>
                         </div>
+main
                     </div>
+                    Quick Actions
+                </h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button class="btn-primary-enhanced bg-green-600 hover:bg-green-700 w-full inline-flex items-center justify-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Check In
+                    </button>
+                    <button class="btn-primary-enhanced bg-red-600 hover:bg-red-700 w-full inline-flex items-center justify-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Check Out
+                    </button>
+                    <button class="btn-primary-enhanced bg-cyan-600 hover:bg-cyan-700 w-full inline-flex items-center justify-center">
+                        <i class="fas fa-calendar-plus mr-2"></i> Request Leave
+                    </button>
+                    <button class="btn-primary-enhanced w-full inline-flex items-center justify-center">
+                        <i class="fas fa-user-edit mr-2"></i> Update Profile
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Dashboard Widgets Row 1 -->
-    <div class="row mb-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Attendance Widget -->
+feat/ui/tailwind-fixtures
+        <div class="card-enhanced animate-slide-in-up hover:scale-105 transition-all duration-300" style="animation-delay: 0.2s;">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 p-4 rounded-t-2xl">
+                <h5 class="text-lg font-bold text-white mb-0 flex items-center">
+                    <i class="fas fa-clock mr-3"></i>My Attendance
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="text-center space-y-4">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold text-green-600">{{ attendance_data.today_status }}</h3>
+                        <small class="text-gray-500">Today's Status</small>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-blue-600">{{ attendance_data.this_week_hours }}h</h4>
+                            <small class="text-gray-500">This Week</small>
+                          
         <div class="col-lg-4 col-md-6 mb-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-success text-white">
@@ -78,22 +120,47 @@
                         <div class="col-6">
                             <h4 class="text-primary">{{ attendance_data.this_week_hours }}h</h4>
                             <small class="text-muted">This Week (Timesheet)</small>
+main
                         </div>
-                        <div class="col-6">
-                            <h4 class="text-info">{{ attendance_data.this_month_days }}</h4>
-                            <small class="text-muted">Days This Month</small>
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-cyan-600">{{ attendance_data.this_month_days }}</h4>
+                            <small class="text-gray-500">Days This Month</small>
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-light">
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle"></i> Last updated: Just now
-                    </small>
-                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 rounded-b-2xl">
+                <small class="text-gray-500 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i> Last updated: Just now
+                </small>
             </div>
         </div>
 
         <!-- Leave Widget -->
+feat/ui/tailwind-fixtures
+        <div class="card-enhanced animate-slide-in-up hover:scale-105 transition-all duration-300" style="animation-delay: 0.3s;">
+            <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 rounded-t-2xl">
+                <h5 class="text-lg font-bold text-white mb-0 flex items-center">
+                    <i class="fas fa-calendar-times mr-3"></i>My Leaves
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="text-center space-y-4">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-yellow-600">{{ leave_data.pending_requests }}</h4>
+                            <small class="text-gray-500">Pending</small>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-green-600">{{ leave_data.available_days }}</h4>
+                            <small class="text-gray-500">Available</small>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                        <div class="text-sm">
+                            <strong class="text-blue-900">Upcoming:</strong><br>
+                            <small class="text-blue-700">{{ leave_data.upcoming_leaves }}</small>
+
         <div class="col-lg-4 col-md-6 mb-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-warning text-dark">
@@ -120,18 +187,43 @@
                                 <strong>Upcoming:</strong><br>
                                 <small>{{ leave_data.upcoming_leaves }}</small>
                             </div>
+main
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-light">
-                    <small class="text-muted">
-                        <i class="fas fa-calendar"></i> Leave balance as of today
-                    </small>
-                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 rounded-b-2xl">
+                <small class="text-gray-500 flex items-center">
+                    <i class="fas fa-calendar mr-2"></i> Leave balance as of today
+                </small>
             </div>
         </div>
 
         <!-- Projects Widget -->
+feat/ui/tailwind-fixtures
+        <div class="card-enhanced animate-slide-in-up hover:scale-105 transition-all duration-300" style="animation-delay: 0.4s;">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-t-2xl">
+                <h5 class="text-lg font-bold text-white mb-0 flex items-center">
+                    <i class="fas fa-project-diagram mr-3"></i>My Projects
+                </h5>
+            </div>
+            <div class="p-6">
+                <div class="text-center space-y-4">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-blue-600">{{ project_data.active_projects }}</h4>
+                            <small class="text-gray-500">Active Projects</small>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-red-600">{{ project_data.tasks_due_today }}</h4>
+                            <small class="text-gray-500">Tasks Due Today</small>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                        <div class="text-sm">
+                            <strong class="text-blue-900">Recent Project:</strong><br>
+                            <small class="text-blue-700">{{ project_data.recent_project }}</small>
+
         <div class="col-lg-4 col-md-12 mb-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-primary text-white">
@@ -154,89 +246,111 @@
                                 <strong>Current Project:</strong><br>
                                 <small>{{ project_data.recent_project }}</small>
                             </div>
+main
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-light">
-                    <small class="text-muted">
-                        <i class="fas fa-tasks"></i> Updated hourly
-                    </small>
-                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 rounded-b-2xl">
+                <small class="text-gray-500 flex items-center">
+                    <i class="fas fa-tasks mr-2"></i> Updated hourly
+                </small>
             </div>
         </div>
     </div>
 
     <!-- Recent Activities Row -->
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-history text-secondary me-2"></i>Recent Activities
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="card-enhanced animate-slide-in-up" style="animation-delay: 0.5s;">
+                <div class="border-l-4 border-gray-500 p-1">
+                    <h5 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-gray-500 to-gray-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-history text-white"></i>
+                        </div>
+                        Recent Activities
                     </h5>
                 </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-sign-in-alt text-success me-2"></i>
-                                <strong>Checked in</strong> at 9:15 AM
+                <div class="p-6 pt-0">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-4 bg-green-50 border-l-4 border-green-400 rounded-r-lg hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-sign-in-alt text-green-600"></i>
+                                </div>
+                                <div>
+                                    <strong class="text-gray-900">Checked in</strong> at 9:15 AM
+                                </div>
                             </div>
-                            <small class="text-muted">2 hours ago</small>
+                            <small class="text-gray-500 bg-white px-3 py-1 rounded-full">2 hours ago</small>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-tasks text-primary me-2"></i>
-                                <strong>Completed task</strong> in HRMS Development project
+                        <div class="flex justify-between items-center p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-tasks text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <strong class="text-gray-900">Completed task</strong> in HRMS Development project
+                                </div>
                             </div>
-                            <small class="text-muted">4 hours ago</small>
+                            <small class="text-gray-500 bg-white px-3 py-1 rounded-full">4 hours ago</small>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-calendar-check text-info me-2"></i>
-                                <strong>Leave request approved</strong> for Dec 25-26
+                        <div class="flex justify-between items-center p-4 bg-cyan-50 border-l-4 border-cyan-400 rounded-r-lg hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-calendar-check text-cyan-600"></i>
+                                </div>
+                                <div>
+                                    <strong class="text-gray-900">Leave request approved</strong> for Dec 25-26
+                                </div>
                             </div>
-                            <small class="text-muted">1 day ago</small>
+                            <small class="text-gray-500 bg-white px-3 py-1 rounded-full">1 day ago</small>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-user-edit text-warning me-2"></i>
-                                <strong>Profile updated</strong> - Contact information
+                        <div class="flex justify-between items-center p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user-edit text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <strong class="text-gray-900">Profile updated</strong> - Contact information
+                                </div>
                             </div>
-                            <small class="text-muted">3 days ago</small>
+                            <small class="text-gray-500 bg-white px-3 py-1 rounded-full">3 days ago</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-bullhorn text-info me-2"></i>Announcements
+        <div class="lg:col-span-1">
+            <div class="card-enhanced animate-slide-in-up" style="animation-delay: 0.6s;">
+                <div class="border-l-4 border-cyan-500 p-1">
+                    <h5 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-bullhorn text-white"></i>
+                        </div>
+                        Announcements
                     </h5>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <strong>Holiday Notice:</strong> Office will be closed on Dec 25-26 for Christmas holidays.
+                <div class="p-6 pt-0 space-y-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                        <div class="text-sm">
+                            <strong class="text-blue-900">Holiday Notice:</strong> Office will be closed on Dec 25-26 for Christmas holidays.
+                        </div>
                     </div>
-                    <div class="alert alert-warning">
-                        <strong>System Maintenance:</strong> HRMS will be under maintenance this Saturday 10 PM - 2 AM.
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+                        <div class="text-sm">
+                            <strong class="text-yellow-900">System Maintenance:</strong> HRMS will be under maintenance this Saturday 10 PM - 2 AM.
+                        </div>
                     </div>
-                    <div class="alert alert-success">
-                        <strong>New Feature:</strong> Mobile attendance marking is now available!
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                        <div class="text-sm">
+                            <strong class="text-green-900">New Feature:</strong> Mobile attendance marking is now available!
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Add any dashboard-specific JavaScript here
-    console.log('Employee Dashboard loaded');
-</script>
 {% endblock %}
