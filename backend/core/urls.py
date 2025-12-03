@@ -1,6 +1,6 @@
 from django.urls import path
 from django.shortcuts import redirect
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
 from . import views
 
 def home_redirect(request):
@@ -10,8 +10,8 @@ def home_redirect(request):
     return redirect('login')
 
 urlpatterns = [
-    path('login/', LoginView.as_view(template_name='core/login.html'), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('dashboard/employee/', views.dashboard_employee_view, name='dashboard_employee'),
     path('dashboard/hr/', views.dashboard_hr_view, name='dashboard_hr'),

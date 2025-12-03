@@ -97,7 +97,7 @@ class RoleBasedAccessMiddleware:
             return None
         
         # Check role-based permissions
-        if user.role and self.has_permission(user.role.name, path):
+        if user.role and self.has_permission(user.role, path):
             return None
         
         # Superuser has access to everything

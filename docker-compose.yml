@@ -54,8 +54,6 @@ services:
       - hrms-network
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py seed_roles &&
-             python manage.py create_superuser_with_role &&
              python manage.py runserver 0.0.0.0:8000"
 
   # Nginx (Optional - for production-like setup)
